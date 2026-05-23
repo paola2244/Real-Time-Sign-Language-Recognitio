@@ -90,3 +90,10 @@ train_output*.log
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+.venv/
+venv311/
+venv/
+__pycache__/
+*.pyc
+.env
