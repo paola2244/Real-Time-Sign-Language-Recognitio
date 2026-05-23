@@ -4,8 +4,14 @@
  */
 
 let selectedFile = null;
+let uploadInitialized = false;
+let historyInitialized = false;
 
 function initUpload() {
+    if (uploadInitialized) {
+        return;
+    }
+
     // Drag and drop
     const uploadArea = document.getElementById('uploadArea');
     const fileInput = document.getElementById('fileInput');
@@ -42,6 +48,7 @@ function initUpload() {
         analyzeBtn.addEventListener('click', analyzeImage);
     }
 
+    uploadInitialized = true;
     console.log('Upload module initialized');
 }
 
@@ -154,6 +161,10 @@ function displayResults(result) {
 // ==================== HISTORY ====================
 
 function initHistory() {
+    if (historyInitialized) {
+        return;
+    }
+
     const clearHistoryBtn = document.getElementById('clearHistoryBtn');
     const downloadCsvBtn = document.getElementById('downloadCsvBtn');
 
@@ -165,6 +176,7 @@ function initHistory() {
         downloadCsvBtn.addEventListener('click', downloadCSV);
     }
 
+    historyInitialized = true;
     console.log('History module initialized');
 }
 

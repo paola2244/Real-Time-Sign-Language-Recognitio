@@ -56,18 +56,23 @@ async function apiUploadFile(endpoint, file) {
 }
 
 // Función para enviar imágenes de webcam
-async function apiPredictFrame(canvas) {
+async function apiPredictFrame(canvas, options = {}) {
     try {
         const blob = await new Promise(resolve => {
             canvas.toBlob(resolve, 'image/jpeg', 0.8);
         });
+
+        if (!blob) {
+            throw new Error('No se pudo capturar el frame de la camara');
+        }
 
         const formData = new FormData();
         formData.append('image', blob, 'frame.jpg');
 
         const response = await fetch('/api/predict', {
             method: 'POST',
-            body: formData
+            body: formData,
+            signal: options.signal
         });
 
         if (!response.ok) {

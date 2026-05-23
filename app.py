@@ -120,7 +120,6 @@ def process_image_for_prediction(image_array, save_to_db=True):
     """Procesa imagen y realiza predicción"""
     try:
         predictor = get_realtime_predictor()
-        agent = get_agent()
 
         # Procesar frame y obtener predicción
         # process_and_predict retorna: (letter, confidence, annotated_frame, metadata)
@@ -134,6 +133,7 @@ def process_image_for_prediction(image_array, save_to_db=True):
                 'confidence': float(confidence),
                 'timestamp': datetime.now().isoformat()
             })
+            session.modified = True
 
 
             # Dibujar landmarks si existen

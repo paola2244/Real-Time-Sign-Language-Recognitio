@@ -9,8 +9,13 @@ let datasetCanvasContext = null;
 let datasetStream = null;
 let datasetRunning = false;
 let datasetInterval = null;
+let datasetInitialized = false;
 
 function initDataset() {
+    if (datasetInitialized) {
+        return;
+    }
+
     datasetVideo = document.getElementById('datasetVideo');
     datasetCanvas = document.getElementById('datasetCanvas');
     datasetCanvasContext = datasetCanvas ? datasetCanvas.getContext('2d') : null;
@@ -25,6 +30,7 @@ function initDataset() {
     if (stopBtn) stopBtn.addEventListener('click', stopDatasetCamera);
     if (refreshBtn) refreshBtn.addEventListener('click', loadDatasetStats);
 
+    datasetInitialized = true;
     console.log('Dataset module initialized');
 }
 

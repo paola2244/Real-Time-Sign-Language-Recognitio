@@ -1,25 +1,38 @@
 /**
- * Camera Control Module - Versión Simplificada
- * Control manual de detección de letras
+ * Camera Control Module
+ * Webcam startup, prediction loop and manual word controls.
  */
 
 let videoElement = null;
 let canvasElement = null;
 let canvasContext = null;
 let stream = null;
+let isInitialized = false;
+let isStarting = false;
 let isRunning = false;
+let isPredicting = false;
 let frameCount = 0;
 let startTime = null;
 let predictionInterval = null;
-let frameRate = 15;
+let statsInterval = null;
+let currentRunId = 0;
+let currentPredictionController = null;
+let frameRate = 5;
 
 function initCamera() {
-    console.log('Inicializando módulo de cámara...');
+    if (isInitialized) {
+        return;
+    }
+
     videoElement = document.getElementById('videoElement');
     canvasElement = document.getElementById('canvasElement');
-    if (canvasElement) {
-        canvasContext = canvasElement.getContext('2d');
+
+    if (!videoElement || !canvasElement) {
+        console.warn('Camera elements were not found.');
+        return;
     }
+
+    canvasContext = canvasElement.getContext('2d', { willReadFrequently: true });
 
     const startBtn = document.getElementById('startCameraBtn');
     const stopBtn = document.getElementById('stopCameraBtn');
@@ -27,6 +40,7 @@ function initCamera() {
     const undoBtn = document.getElementById('undoLetterBtn');
     const clearBtn = document.getElementById('clearWordBtn');
     const saveBtn = document.getElementById('addWordBtn');
+    const thresholdSlider = document.getElementById('thresholdSlider');
 
     if (startBtn) startBtn.addEventListener('click', startCamera);
     if (stopBtn) stopBtn.addEventListener('click', stopCamera);
@@ -34,107 +48,244 @@ function initCamera() {
     if (undoBtn) undoBtn.addEventListener('click', undoLetter);
     if (clearBtn) clearBtn.addEventListener('click', clearWord);
     if (saveBtn) saveBtn.addEventListener('click', saveWord);
+    if (thresholdSlider) {
+        thresholdSlider.addEventListener('input', () => {
+            const value = document.getElementById('thresholdValue');
+            if (value) value.textContent = thresholdSlider.value;
+        });
+    }
 
-    console.log('Módulo de cámara inicializado');
+    videoElement.setAttribute('playsinline', 'true');
+    videoElement.muted = true;
+    isInitialized = true;
+    console.log('Camera module initialized');
 }
 
 async function startCamera() {
+    if (isStarting || isRunning) {
+        return;
+    }
+
+    isStarting = true;
+    setStartButtonState(true);
+    hideCameraError();
+
     try {
-        console.log('Iniciando cámara...');
+        stopPredictionLoop();
+        stopStream();
+
+        console.log('Starting camera...');
         stream = await navigator.mediaDevices.getUserMedia({
             video: {
                 facingMode: 'user',
                 width: { ideal: 640 },
                 height: { ideal: 480 }
-            }
+            },
+            audio: false
         });
 
         videoElement.srcObject = stream;
+        await waitForVideoReady(videoElement);
+        await videoElement.play();
 
-        videoElement.onloadedmetadata = () => {
-            console.log('Video metadata cargado');
-            videoElement.play();
+        canvasElement.width = videoElement.videoWidth || 640;
+        canvasElement.height = videoElement.videoHeight || 480;
 
-            canvasElement.width = videoElement.videoWidth;
-            canvasElement.height = videoElement.videoHeight;
+        currentRunId += 1;
+        isRunning = true;
+        isPredicting = false;
+        startTime = Date.now();
+        frameCount = 0;
+        window.currentLetter = null;
 
-            isRunning = true;
-            startTime = Date.now();
-            frameCount = 0;
-
-            document.getElementById('startCameraBtn').classList.add('d-none');
-            document.getElementById('stopCameraBtn').classList.remove('d-none');
-
-            startPredictionLoop();
-        };
-
+        setCameraButtons(true);
+        updateStats();
+        startStatsTimer();
+        startPredictionLoop(currentRunId);
+        console.log('Camera started');
     } catch (error) {
-        console.error('Error en cámara:', error);
-        alert('No se puede acceder a la cámara. Verifica los permisos.');
+        console.error('Camera error:', error);
+        showCameraError('No se puede acceder a la camara. Revisa permisos o si otra app la esta usando.');
+        stopCamera();
+    } finally {
+        isStarting = false;
+        setStartButtonState(false);
     }
 }
 
 function stopCamera() {
-    console.log('Deteniendo cámara...');
-    if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-    }
-
+    console.log('Stopping camera...');
+    currentRunId += 1;
+    isStarting = false;
     isRunning = false;
-    videoElement.srcObject = null;
+    isPredicting = false;
 
-    document.getElementById('startCameraBtn').classList.remove('d-none');
-    document.getElementById('stopCameraBtn').classList.add('d-none');
+    stopPredictionLoop();
+    stopStatsTimer();
+    abortCurrentPrediction();
+    stopStream();
 
-    if (predictionInterval) {
-        clearInterval(predictionInterval);
+    if (videoElement) {
+        videoElement.pause();
+        videoElement.srcObject = null;
     }
+
+    if (canvasContext && canvasElement) {
+        canvasContext.clearRect(0, 0, canvasElement.width, canvasElement.height);
+    }
+
+    window.currentLetter = null;
+    setCameraButtons(false);
 }
 
-function startPredictionLoop() {
-    console.log('Iniciando loop de predicción...');
-    const interval = Math.floor(1000 / frameRate);
+function waitForVideoReady(video) {
+    if (video.readyState >= 2 && video.videoWidth > 0) {
+        return Promise.resolve();
+    }
 
-    predictionInterval = setInterval(async () => {
-        if (!isRunning || !videoElement.srcObject) {
+    return new Promise((resolve, reject) => {
+        const timeout = window.setTimeout(() => {
+            cleanup();
+            reject(new Error('Timed out waiting for video metadata'));
+        }, 8000);
+
+        const onReady = () => {
+            if (video.videoWidth > 0) {
+                cleanup();
+                resolve();
+            }
+        };
+
+        const onError = () => {
+            cleanup();
+            reject(new Error('Video element failed to load camera stream'));
+        };
+
+        const cleanup = () => {
+            window.clearTimeout(timeout);
+            video.removeEventListener('loadedmetadata', onReady);
+            video.removeEventListener('loadeddata', onReady);
+            video.removeEventListener('canplay', onReady);
+            video.removeEventListener('error', onError);
+        };
+
+        video.addEventListener('loadedmetadata', onReady);
+        video.addEventListener('loadeddata', onReady);
+        video.addEventListener('canplay', onReady);
+        video.addEventListener('error', onError);
+    });
+}
+
+function startPredictionLoop(runId) {
+    stopPredictionLoop();
+    console.log('Starting prediction loop...');
+
+    const interval = Math.max(150, Math.floor(1000 / frameRate));
+    predictionInterval = window.setInterval(() => {
+        predictCurrentFrame(runId);
+    }, interval);
+
+    predictCurrentFrame(runId);
+}
+
+async function predictCurrentFrame(runId) {
+    if (!isRunning || runId !== currentRunId || isPredicting || !videoElement.srcObject) {
+        return;
+    }
+
+    if (videoElement.readyState < 2 || canvasElement.width === 0 || canvasElement.height === 0) {
+        return;
+    }
+
+    isPredicting = true;
+    currentPredictionController = new AbortController();
+    const predictionTimeout = window.setTimeout(() => {
+        if (currentPredictionController) {
+            currentPredictionController.abort();
+        }
+    }, 10000);
+
+    try {
+        canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+        const result = await apiPredictFrame(canvasElement, {
+            signal: currentPredictionController.signal
+        });
+
+        if (runId !== currentRunId || !isRunning) {
             return;
         }
 
-        try {
-            canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
-            const result = await apiPredictFrame(canvasElement);
-
-            if (result.success) {
-                updatePredictionUI(result);
-                frameCount++;
-            }
-        } catch (error) {
-            console.error('Error en predicción:', error);
+        if (result && result.success) {
+            updatePredictionUI(result);
+            frameCount += 1;
+            updateStats();
+        } else if (result && result.error) {
+            console.warn('Prediction returned an error:', result.error);
         }
-    }, interval);
+    } catch (error) {
+        if (error.name !== 'AbortError') {
+            console.error('Prediction error:', error);
+        }
+    } finally {
+        window.clearTimeout(predictionTimeout);
+        if (runId === currentRunId) {
+            isPredicting = false;
+            currentPredictionController = null;
+        }
+    }
+}
+
+function stopPredictionLoop() {
+    if (predictionInterval) {
+        window.clearInterval(predictionInterval);
+        predictionInterval = null;
+    }
+}
+
+function startStatsTimer() {
+    stopStatsTimer();
+    statsInterval = window.setInterval(updateStats, 1000);
+}
+
+function stopStatsTimer() {
+    if (statsInterval) {
+        window.clearInterval(statsInterval);
+        statsInterval = null;
+    }
+}
+
+function abortCurrentPrediction() {
+    if (currentPredictionController) {
+        currentPredictionController.abort();
+        currentPredictionController = null;
+    }
+}
+
+function stopStream() {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+    }
 }
 
 function updatePredictionUI(result) {
-    // Panel principal
     const letterEl = document.getElementById('currentLetter');
     const confBar = document.getElementById('confidenceBar');
     const confText = document.getElementById('confidenceText');
-
-    if (letterEl) {
-        letterEl.textContent = (result.letter && result.letter !== 'N/A') ? result.letter : '-';
-    }
-
-    const conf = Math.round((result.confidence || 0) * 100);
-    if (confBar) confBar.style.width = conf + '%';
-    if (confText) confText.textContent = `Confianza: ${conf}%`;
-
-    // Panel de palabra actual
     const detLetter = document.getElementById('detectedLetterDisplay');
     const detConf = document.getElementById('detectedConfidenceDisplay');
+    const showLandmarks = document.getElementById('showLandmarks');
 
-    if (result.letter && result.letter !== 'N/A') {
+    const confidence = Math.round((result.confidence || 0) * 100);
+    const hasLetter = result.letter && result.letter !== 'N/A';
+
+    if (letterEl) letterEl.textContent = hasLetter ? result.letter : '-';
+    if (confBar) confBar.style.width = confidence + '%';
+    if (confText) confText.textContent = `Confianza: ${confidence}%`;
+
+    if (hasLetter) {
         if (detLetter) detLetter.textContent = result.letter;
-        if (detConf) detConf.textContent = conf + '%';
+        if (detConf) detConf.textContent = confidence + '%';
         window.currentLetter = result.letter;
     } else {
         if (detLetter) detLetter.textContent = '-';
@@ -142,19 +293,45 @@ function updatePredictionUI(result) {
         window.currentLetter = null;
     }
 
-    // Landmarks
-    if (result.landmarks_image) {
-        const img = new Image();
-        img.onload = () => {
+    if (result.landmarks_image && (!showLandmarks || showLandmarks.checked)) {
+        drawLandmarks(result.landmarks_image);
+    }
+}
+
+function drawLandmarks(base64Image) {
+    const img = new Image();
+    img.onload = () => {
+        if (isRunning && canvasContext && canvasElement) {
             canvasContext.drawImage(img, 0, 0, canvasElement.width, canvasElement.height);
-        };
-        img.src = 'data:image/png;base64,' + result.landmarks_image;
+        }
+    };
+    img.src = 'data:image/png;base64,' + base64Image;
+}
+
+function updateStats() {
+    const statsTotal = document.getElementById('statsTotal');
+    const statsDuration = document.getElementById('statsDuration');
+
+    if (statsTotal) {
+        statsTotal.textContent = String(frameCount);
+    }
+
+    if (statsDuration) {
+        if (!startTime || !isRunning) {
+            statsDuration.textContent = '00:00';
+            return;
+        }
+
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const minutes = Math.floor(elapsed / 60);
+        const seconds = elapsed % 60;
+        statsDuration.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     }
 }
 
 async function acceptLetter() {
     if (!window.currentLetter) {
-        alert('No hay letra detectada');
+        showNotification('No hay letra detectada', 'warning');
         return;
     }
 
@@ -162,11 +339,11 @@ async function acceptLetter() {
         const result = await addLetter(window.currentLetter);
         if (result.success) {
             document.getElementById('currentWord').value = result.current_word;
-            console.log('Letra agregada:', window.currentLetter);
+            showNotification(`Letra "${window.currentLetter}" agregada`, 'success');
         }
     } catch (error) {
-        console.error('Error:', error);
-        alert('Error al agregar letra');
+        console.error('Error adding letter:', error);
+        showNotification('Error al agregar letra', 'error');
     }
 }
 
@@ -177,51 +354,53 @@ async function undoLetter() {
             document.getElementById('currentWord').value = result.current_word;
         }
     } catch (error) {
-        console.error('Error:', error);
-        alert('Error al deshacer');
+        console.error('Error removing letter:', error);
+        showNotification('Error al deshacer', 'error');
     }
 }
 
 async function clearWord() {
-    if (!confirm('¿Borrar palabra actual?')) return;
+    if (!confirm('Borrar palabra actual?')) return;
 
     try {
         await resetWord();
         document.getElementById('currentWord').value = '';
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error clearing word:', error);
+        showNotification('Error al borrar la palabra', 'error');
     }
 }
 
 async function saveWord() {
     const word = document.getElementById('currentWord').value;
     if (!word) {
-        alert('No hay palabra para guardar');
+        showNotification('No hay palabra para guardar', 'warning');
         return;
     }
 
-    // Guardar en lista
     if (!window.savedWords) window.savedWords = [];
     window.savedWords.push({
         word: word,
         time: new Date().toLocaleTimeString('es-ES')
     });
 
-    // Mostrar
     updateWordsList();
 
-    // Limpiar
     try {
         await resetWord();
         document.getElementById('currentWord').value = '';
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error resetting word:', error);
     }
 }
 
 function updateWordsList() {
     const list = document.getElementById('wordsHistoryList');
     const noMsg = document.getElementById('noWordsMessage');
+
+    if (!list || !noMsg) {
+        return;
+    }
 
     if (!window.savedWords || window.savedWords.length === 0) {
         list.innerHTML = '';
@@ -230,14 +409,42 @@ function updateWordsList() {
     }
 
     noMsg.style.display = 'none';
-    let html = '';
-    window.savedWords.forEach((item, i) => {
-        html += `<span class="badge bg-primary me-1 mb-1">${i+1}. ${item.word} ${item.time}</span>`;
-    });
-    list.innerHTML = html;
+    list.innerHTML = window.savedWords.map((item, index) => {
+        return `<span class="badge bg-primary me-1 mb-1">${index + 1}. ${item.word} ${item.time}</span>`;
+    }).join('');
 }
 
-// Inicializar
+function setCameraButtons(running) {
+    const startBtn = document.getElementById('startCameraBtn');
+    const stopBtn = document.getElementById('stopCameraBtn');
+
+    if (startBtn) startBtn.classList.toggle('d-none', running);
+    if (stopBtn) stopBtn.classList.toggle('d-none', !running);
+}
+
+function setStartButtonState(disabled) {
+    const startBtn = document.getElementById('startCameraBtn');
+    if (startBtn) {
+        startBtn.disabled = disabled;
+    }
+}
+
+function showCameraError(message) {
+    const errorEl = document.getElementById('videoError');
+    if (errorEl) {
+        errorEl.textContent = message;
+        errorEl.classList.remove('d-none');
+    }
+    showNotification(message, 'error');
+}
+
+function hideCameraError() {
+    const errorEl = document.getElementById('videoError');
+    if (errorEl) {
+        errorEl.classList.add('d-none');
+    }
+}
+
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initCamera);
 } else {
