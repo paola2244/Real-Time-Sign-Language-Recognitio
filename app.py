@@ -133,6 +133,7 @@ def process_image_for_prediction(image_array, save_to_db=True):
                 'confidence': float(confidence),
                 'timestamp': datetime.now().isoformat()
             })
+            session['predictions_history'] = session['predictions_history'][-100:]
             session.modified = True
 
 
@@ -372,6 +373,15 @@ def api_reset_word():
 def api_history_data():
     """Obtiene historial de predicciones"""
     try:
+        session_predictions = session.get('predictions_history', [])
+        session_data = [{
+            'letter': str(p.get('letter', '')),
+            'confidence': float(p.get('confidence', 0.0)),
+            'session_id': session.get('session_id', ''),
+            'word_context': str(p.get('word_context', '')),
+            'timestamp': p.get('timestamp', datetime.now().isoformat())
+        } for p in session_predictions]
+
         try:
             repo = get_prediction_repository()
             predictions = repo.get_all(limit=100)
@@ -384,8 +394,13 @@ def api_history_data():
                 'timestamp': p.timestamp.isoformat() if hasattr(p.timestamp, 'isoformat') else str(p.timestamp)
             } for p in predictions]
         except Exception as db_error:
-            logger.warning(f"Database access failed, returning empty history: {str(db_error)}")
-            data = []
+            logger.warning(f"Database access failed, using session history: {str(db_error)}")
+            data = session_data
+
+        if not data and session_data:
+            data = session_data
+
+        data = sorted(data, key=lambda p: p.get('timestamp', ''), reverse=True)[:100]
 
         confidences = [p['confidence'] for p in data] if data else []
         stats = {
@@ -410,13 +425,22 @@ def api_history_data():
 def api_history_csv():
     """Descarga historial como CSV"""
     try:
-        repo = get_prediction_repository()
-        predictions = repo.get_all()
-
         csv_content = 'Letter,Confidence,Session ID,Word Context,Timestamp\n'
-        for p in predictions:
-            timestamp = p.timestamp.isoformat() if hasattr(p.timestamp, 'isoformat') else str(p.timestamp)
-            csv_content += f'{p.letter},{p.confidence},{p.session_id},{p.word_context},{timestamp}\n'
+        try:
+            repo = get_prediction_repository()
+            predictions = repo.get_all()
+
+            for p in predictions:
+                timestamp = p.timestamp.isoformat() if hasattr(p.timestamp, 'isoformat') else str(p.timestamp)
+                csv_content += f'{p.letter},{p.confidence},{p.session_id},{p.word_context},{timestamp}\n'
+        except Exception as db_error:
+            logger.warning(f"Database access failed for CSV, using session history: {str(db_error)}")
+            for p in session.get('predictions_history', []):
+                csv_content += (
+                    f"{p.get('letter', '')},{p.get('confidence', 0.0)},"
+                    f"{session.get('session_id', '')},{p.get('word_context', '')},"
+                    f"{p.get('timestamp', '')}\n"
+                )
 
         from flask import make_response
         response = make_response(csv_content)
@@ -433,8 +457,15 @@ def api_history_csv():
 def api_history_clear():
     """Limpia el historial de predicciones"""
     try:
-        repo = get_prediction_repository()
-        repo.clear_all()
+        session['predictions_history'] = []
+        session['total_predictions'] = 0
+        session.modified = True
+
+        try:
+            repo = get_prediction_repository()
+            repo.clear_all()
+        except Exception as db_error:
+            logger.warning(f"Database access failed while clearing history: {str(db_error)}")
 
         return jsonify({
             'success': True,
