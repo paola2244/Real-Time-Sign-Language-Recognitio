@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}🤟 Traductor de Lenguaje de Señas{% endblock %}</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-hand-spock"></i> Traductor de Señas
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-page="home" onclick="switchPage('home', event)">
+                            <i class="fas fa-camera"></i> Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-page="upload" onclick="switchPage('upload', event)">
+                            <i class="fas fa-image"></i> Subir Foto
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-page="history" onclick="switchPage('history', event)">
+                            <i class="fas fa-history"></i> Historial
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-page="about" onclick="switchPage('about', event)">
+                            <i class="fas fa-info-circle"></i> Acerca de
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container-fluid py-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light text-center py-4 mt-5">
+        <p class="mb-0">
+            <i class="fas fa-heart text-danger"></i> Traductor de Lenguaje de Señas
+            - Construcción con TensorFlow, MediaPipe y Flask
+        </p>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+
+    {% block extra_js %}{% endblock %}
+
+    <script>
+        // Inicialización básica
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded');
+            updateSessionState();
+        });
+
+        function switchPage(page, event) {
+            if (event) event.preventDefault();
+
+            // Ocultar todas las secciones
+            document.querySelectorAll('[data-page]').forEach(el => {
+                el.classList.add('d-none');
+            });
+
+            // Mostrar la sección seleccionada
+            const targetSection = document.querySelector('[data-page="' + page + '"]');
+            if (targetSection) {
+                targetSection.classList.remove('d-none');
+
+                // Si es historial, cargar datos
+                if (page === 'history') {
+                    loadHistory();
+                }
+            }
+
+            // Actualizar navbar
+            document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelector('[data-page="' + page + '"].nav-link')?.classList.add('active');
+        }
+
+        function updateSessionState() {
+            apiCall('/api/session-state', 'GET', {}).then(data => {
+                console.log('Session state:', data);
+                // Actualizar cualquier elemento que necesite el estado de sesión
+            });
+        }
+    </script>
+</body>
+</html>

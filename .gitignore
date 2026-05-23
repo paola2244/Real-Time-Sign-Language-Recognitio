@@ -1,0 +1,92 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+venv311/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Uploads
+uploads/
+temp/
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Cache
+.cache/
+.pytest_cache/
+
+# Coverage
+htmlcov/
+.coverage
+.coverage.*
+
+# Flask
+instance/
+.webassets-cache
+flask_session/
+
+# Test files (development/debugging only)
+test_*.py
+
+# Old/backup models (use trained_models in C:/models_prod)
+trained_models/best_model.keras
+trained_models/*_improved_*.h5
+trained_models/*_improved_*.json
+trained_models/training_history.pkl
+
+# Old datasets (replaced by data/collected_data)
+datasets/kaggle/
+datasets/landmarks/
+data/raw/
+
+# Old scripts (replaced by train_model_with_collected_data.py)
+scripts/download_landmarks_dataset.py
+scripts/train_model.py
+
+# Training logs
+train_output*.log
+
+# Misc
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json

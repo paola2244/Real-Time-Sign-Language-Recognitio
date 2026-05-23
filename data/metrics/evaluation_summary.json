@@ -1,0 +1,11 @@
+{
+  "accuracy": 1.0,
+  "precision": 1.0,
+  "recall": 1.0,
+  "f1": 1.0,
+  "test_samples": 7172,
+  "confusion_matrix_path": "data\\metrics\\confusion_matrix.png",
+  "report_path": "data\\metrics\\classification_report.txt",
+  "test_loss": 0.001431007171049714,
+  "test_accuracy": 1.0
+}
