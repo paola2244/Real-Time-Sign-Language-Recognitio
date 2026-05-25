@@ -154,15 +154,11 @@ class CollectedDataProcessor:
 class HybridDataTrainer:
     """Entrena el modelo con datos combinados."""
 
-    def __init__(self, model_path: str = 'C:/models_prod/best_model_hybrid.h5',
-                 output_dir: str = 'trained_models'):
-        """
-        Inicializa el entrenador.
-
-        Args:
-            model_path: Ruta del modelo actual
-            output_dir: Directorio para guardar modelo mejorado
-        """
+    def __init__(self, model_path: str = None,
+                output_dir: str = 'trained_models'):
+        if model_path is None:
+            model_path = str(PROJECT_ROOT / 'trained_models' / 'best_model_hybrid.h5')
+        
         self.model_path = Path(model_path)
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -178,7 +174,7 @@ class HybridDataTrainer:
         return model
 
     def prepare_training_data(self, X: np.ndarray, y: np.ndarray,
-                             validation_split: float = 0.2) -> tuple:
+                            validation_split: float = 0.2) -> tuple:
         """
         Prepara datos para entrenamiento usando las 28 clases originales.
 
@@ -192,7 +188,8 @@ class HybridDataTrainer:
         """
         # Usar las 28 clases originales
         original_labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-                          'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'del', 'space']
+                        'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+                        'del', 'space', 'BORRAR', 'ESPACIO', 'ESCUCHAR']
         label_to_idx = {label: idx for idx, label in enumerate(original_labels)}
         num_classes = len(original_labels)
 
@@ -222,18 +219,17 @@ class HybridDataTrainer:
         return X_train, y_train, X_val, y_val, label_to_idx
 
     def train(self, X_train, y_train, X_val, y_val, epochs: int = 50):
-        """
-        Entrena el modelo.
-
-        Args:
-            X_train, y_train: Datos de entrenamiento
-            X_val, y_val: Datos de validación
-            epochs: Número de épocas
-        """
         print('[*] Entrenando modelo...')
 
-        # Cargar modelo
-        model = self.load_existing_model()
+        # Crear modelo NUEVO con 31 clases (no cargar el viejo)
+        num_classes = y_train.shape[1]
+        model = create_hybrid_model(input_features=63, num_classes=num_classes)
+        model.compile(
+            optimizer='adam',
+            loss='categorical_crossentropy',
+            metrics=['accuracy']
+        )
+        print(f'[+] Modelo creado con {num_classes} clases')
 
         # Callbacks
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -270,8 +266,7 @@ class HybridDataTrainer:
             verbose=1
         )
 
-        print(f'[+] Modelo mejorado guardado: {model_file}')
-
+        print(f'[+] Modelo guardado: {model_file}')
         return model, model_file, history
 
     def update_labels(self, label_to_idx: dict):

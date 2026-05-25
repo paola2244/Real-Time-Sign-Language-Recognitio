@@ -1,661 +1,829 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>🤟 Traductor de Lenguaje de Señas</title>
 
     <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
 
     <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+  <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/">
-                <i class="fas fa-hand-spock"></i> Traductor de Señas
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#home" onclick="switchPage('home', event)">
-                            <i class="fas fa-camera"></i> Inicio
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#upload" onclick="switchPage('upload', event)">
-                            <i class="fas fa-image"></i> Subir Foto
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#dataset" onclick="switchPage('dataset', event)">
-                            <i class="fas fa-database"></i> Dataset
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#history" onclick="switchPage('history', event)">
-                            <i class="fas fa-history"></i> Historial
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#about" onclick="switchPage('about', event)">
-                            <i class="fas fa-info-circle"></i> Acerca de
-                        </a>
-                    </li>
-                </ul>
-            </div>
+      <div class="container-fluid">
+        <a class="navbar-brand" href="/">
+          <i class="fas fa-hand-spock"></i> Traductor de Señas
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a
+                class="nav-link active"
+                href="#home"
+                onclick="switchPage('home', event)"
+              >
+                <i class="fas fa-camera"></i> Inicio
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="#upload"
+                onclick="switchPage('upload', event)"
+              >
+                <i class="fas fa-image"></i> Subir Foto
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="#dataset"
+                onclick="switchPage('dataset', event)"
+              >
+                <i class="fas fa-database"></i> Dataset
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="#history"
+                onclick="switchPage('history', event)"
+              >
+                <i class="fas fa-history"></i> Historial
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="#about"
+                onclick="switchPage('about', event)"
+              >
+                <i class="fas fa-info-circle"></i> Acerca de
+              </a>
+            </li>
+          </ul>
         </div>
+      </div>
     </nav>
 
     <!-- Main Content -->
     <main class="container-fluid py-4">
+      <!-- SECCIÓN: Inicio (Webcam) -->
+      <section id="home" class="page-section" style="display: block">
+        <div class="container">
+          <h1 class="mb-4">
+            <i class="fas fa-camera"></i> Detección en Tiempo Real
+          </h1>
 
-        <!-- SECCIÓN: Inicio (Webcam) -->
-        <section id="home" class="page-section" style="display: block;">
-            <div class="container">
-                <h1 class="mb-4">
-                    <i class="fas fa-camera"></i> Detección en Tiempo Real
-                </h1>
+          {% if not model_exists %}
+          <div
+            class="alert alert-danger alert-dismissible fade show"
+            role="alert"
+          >
+            <strong
+              ><i class="fas fa-exclamation-triangle"></i> Error de
+              Modelo</strong
+            >
+            <p>
+              Los archivos del modelo no fueron encontrados. Por favor, entrena
+              el modelo primero:
+            </p>
+            <code>python scripts/train_model.py</code>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+            ></button>
+          </div>
+          {% endif %}
 
-                {% if not model_exists %}
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <strong><i class="fas fa-exclamation-triangle"></i> Error de Modelo</strong>
-                    <p>Los archivos del modelo no fueron encontrados. Por favor, entrena el modelo primero:</p>
-                    <code>python scripts/train_model.py</code>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          <div class="row">
+            <!-- Video/Canvas -->
+            <div class="col-lg-8">
+              <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                  <i class="fas fa-video"></i> Vista de Cámara
                 </div>
-                {% endif %}
-
-                <div class="row">
-                    <!-- Video/Canvas -->
-                    <div class="col-lg-8">
-                        <div class="card mb-4">
-                            <div class="card-header bg-primary text-white">
-                                <i class="fas fa-video"></i> Vista de Cámara
-                            </div>
-                            <div class="card-body text-center">
-                                <video id="videoElement" width="100%" height="auto" playsinline></video>
-                                <canvas id="canvasElement" style="display: none;"></canvas>
-                                <div id="videoError" class="alert alert-warning d-none mt-3" role="alert">
-                                    <i class="fas fa-camera-slash"></i> No se puede acceder a la cámara
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-12">
-                                <button id="startCameraBtn" class="btn btn-success btn-lg w-100 mb-2">
-                                    <i class="fas fa-play"></i> Iniciar Cámara
-                                </button>
-                                <button id="stopCameraBtn" class="btn btn-danger btn-lg w-100 d-none">
-                                    <i class="fas fa-stop"></i> Detener Cámara
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Panel de Control y Predicción -->
-                    <div class="col-lg-4">
-                        <!-- Estado del Modelo -->
-                        <div class="card mb-4">
-                            <div class="card-header bg-info text-white">
-                                <i class="fas fa-cogs"></i> Estado
-                            </div>
-                            <div class="card-body">
-                                {% if model_exists %}
-                                <span class="badge bg-success"><i class="fas fa-check"></i> Modelo Listo</span>
-                                {% else %}
-                                <span class="badge bg-danger"><i class="fas fa-times"></i> Modelo No Disponible</span>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <!-- Predicción Actual -->
-                        <div class="card mb-4">
-                            <div class="card-header bg-warning text-dark">
-                                <i class="fas fa-lightbulb"></i> Predicción
-                            </div>
-                            <div class="card-body">
-                                <div class="text-center">
-                                    <div class="display-4" id="currentLetter">-</div>
-                                    <small class="text-muted">Letra Detectada</small>
-                                </div>
-                                <div class="mt-3">
-                                    <div class="progress">
-                                        <div id="confidenceBar" class="progress-bar bg-success" role="progressbar" style="width: 0%;"></div>
-                                    </div>
-                                    <small id="confidenceText" class="text-muted">Confianza: 0%</small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Palabra Actual -->
-                        <div class="card mb-4">
-                            <div class="card-header bg-primary text-white">
-                                <i class="fas fa-font"></i> Palabra Actual
-                            </div>
-                            <div class="card-body">
-                                <!-- Input de Palabra -->
-                                <div class="input-group mb-2">
-                                    <input type="text" id="currentWord" class="form-control" placeholder="Palabra..." readonly style="font-size: 1.2em; font-weight: bold;">
-                                    <button id="clearWordBtn" class="btn btn-outline-danger" type="button" title="Borrar palabra actual">
-                                        <i class="fas fa-trash"></i> Borrar
-                                    </button>
-                                </div>
-
-                                <!-- Letra Detectada -->
-                                <div class="alert alert-info mb-2">
-                                    <small><strong>Letra Detectada:</strong> <span id="detectedLetterDisplay">-</span>
-                                    (<span id="detectedConfidenceDisplay">0%</span>)</small>
-                                </div>
-
-                                <!-- Botones de Control Manual -->
-                                <div class="btn-group w-100 mb-2" role="group">
-                                    <button id="acceptLetterBtn" class="btn btn-success btn-sm flex-grow-1" title="Agregar esta letra a la palabra">
-                                        <i class="fas fa-check"></i> Agregar
-                                    </button>
-                                    <button id="undoLetterBtn" class="btn btn-warning btn-sm flex-grow-1" title="Quitar última letra">
-                                        <i class="fas fa-undo"></i> Deshacer
-                                    </button>
-                                </div>
-
-                                <!-- Guardar Palabra -->
-                                <button id="addWordBtn" class="btn btn-success btn-sm w-100">
-                                    <i class="fas fa-save"></i> Guardar Palabra
-                                </button>
-
-                                <!-- Historial de Palabras -->
-                                <div class="mt-3">
-                                    <small><strong>Palabras Guardadas:</strong></small>
-                                    <div id="wordsHistoryContainer" style="max-height: 150px; overflow-y: auto; border: 1px solid #ddd; border-radius: 5px; padding: 8px;">
-                                        <p class="text-muted mb-0" id="noWordsMessage">Sin palabras aún</p>
-                                        <div id="wordsHistoryList"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Configuración -->
-                        <div class="card mb-4">
-                            <div class="card-header bg-secondary text-white">
-                                <i class="fas fa-sliders-h"></i> Configuración
-                            </div>
-                            <div class="card-body">
-                                <label for="thresholdSlider" class="form-label">
-                                    Umbral de Confianza: <span id="thresholdValue">75</span>%
-                                </label>
-                                <input type="range" id="thresholdSlider" class="form-range" min="0" max="100" value="75">
-
-                                <div class="form-check mt-3">
-                                    <input class="form-check-input" type="checkbox" id="showLandmarks" checked>
-                                    <label class="form-check-label" for="showLandmarks">
-                                        Mostrar Puntos de Referencia
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Estadísticas -->
-                        <div class="card mb-4">
-                            <div class="card-header bg-dark text-white">
-                                <i class="fas fa-chart-bar"></i> Estadísticas
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-6">
-                                        <div class="text-center">
-                                            <div class="h4" id="statsTotal">0</div>
-                                            <small class="text-muted">Predicciones</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="text-center">
-                                            <div class="h4" id="statsDuration">00:00</div>
-                                            <small class="text-muted">Duración</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="card-body text-center">
+                  <div style="position: relative">
+                    <video
+                      id="videoElement"
+                      width="100%"
+                      height="auto"
+                      playsinline
+                      style="display: block"
+                    ></video>
+                    <canvas
+                      id="canvasElement"
+                      style="
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        pointer-events: none;
+                        opacity: 0;
+                      "
+                    ></canvas>
+                  </div>
+                  <div
+                    id="videoError"
+                    class="alert alert-warning d-none mt-3"
+                    role="alert"
+                  >
+                    <i class="fas fa-camera-slash"></i> No se puede acceder a la
+                    cámara
+                  </div>
                 </div>
-            </div>
-        </section>
+              </div>
 
-        <!-- SECCIÓN: Subir Foto -->
-        <section id="upload" class="page-section d-none">
-            <div class="container">
-                <h1 class="mb-4">
-                    <i class="fas fa-image"></i> Subir Foto
-                </h1>
-
-                <div class="row">
-                    <div class="col-lg-6">
-                        <div class="card mb-4">
-                            <div class="card-header bg-primary text-white">
-                                <i class="fas fa-cloud-upload-alt"></i> Seleccionar Imagen
-                            </div>
-                            <div class="card-body">
-                                <div class="upload-area" id="uploadArea">
-                                    <i class="fas fa-image fa-3x mb-3"></i>
-                                    <p class="mb-2">Arrastra tu imagen aquí o haz click para seleccionar</p>
-                                    <small class="text-muted">Formatos: PNG, JPG, JPEG, GIF, WebP (máx. 200MB)</small>
-                                    <input type="file" id="fileInput" class="d-none" accept="image/*">
-                                </div>
-                                <div id="uploadError" class="alert alert-danger d-none mt-3" role="alert"></div>
-                            </div>
-                        </div>
-
-                        <button id="analyzeBtn" class="btn btn-success btn-lg w-100 mb-4" disabled>
-                            <i class="fas fa-magic"></i> Analizar Imagen
-                        </button>
-                    </div>
-
-                    <div class="col-lg-6">
-                        <!-- Preview de Imagen -->
-                        <div class="card mb-4">
-                            <div class="card-header bg-info text-white">
-                                <i class="fas fa-eye"></i> Vista Previa
-                            </div>
-                            <div class="card-body text-center">
-                                <img id="previewImage" style="max-width: 100%; max-height: 400px; display: none;">
-                                <div id="noPreview" class="text-muted">
-                                    <i class="fas fa-image fa-3x opacity-50"></i>
-                                    <p>Ninguna imagen seleccionada</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Resultados -->
-                        <div id="resultsContainer" class="d-none">
-                            <div class="card">
-                                <div class="card-header bg-success text-white">
-                                    <i class="fas fa-check"></i> Resultado
-                                </div>
-                                <div class="card-body">
-                                    <div class="text-center">
-                                        <div class="display-3" id="resultLetter">-</div>
-                                        <small class="text-muted">Letra Detectada</small>
-                                    </div>
-                                    <div class="mt-3">
-                                        <div class="progress">
-                                            <div id="resultConfidenceBar" class="progress-bar bg-success" role="progressbar" style="width: 0%;"></div>
-                                        </div>
-                                        <small id="resultConfidenceText">Confianza: 0%</small>
-                                    </div>
-
-                                    <!-- Landmarks -->
-                                    <div class="mt-4">
-                                        <img id="resultLandmarks" style="max-width: 100%;">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+              <div class="row">
+                <div class="col-12">
+                  <button
+                    id="startCameraBtn"
+                    class="btn btn-success btn-lg w-100 mb-2"
+                  >
+                    <i class="fas fa-play"></i> Iniciar Cámara
+                  </button>
+                  <button
+                    id="stopCameraBtn"
+                    class="btn btn-danger btn-lg w-100 d-none"
+                  >
+                    <i class="fas fa-stop"></i> Detener Cámara
+                  </button>
                 </div>
-            </div>
-        </section>
-
-        <!-- SECCIÓN: Recopilar Datos -->
-        <section id="dataset" class="page-section d-none">
-            <div class="container">
-                <h1 class="mb-4">
-                    <i class="fas fa-database"></i> Recopilar Datos (Dataset)
-                </h1>
-
-                <div class="alert alert-info" role="alert">
-                    <i class="fas fa-lightbulb"></i> <strong>Ayuda a mejorar el modelo:</strong>
-                    Toma fotos de tus señas para cada letra y guárdalas. Más datos = Mejor detección
+              </div>
+              <!-- Palabra Actual -->
+              <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                  <i class="fas fa-font"></i> Palabra Actual
                 </div>
-
-                <div class="row">
-                    <div class="col-lg-6">
-                        <div class="card mb-4">
-                            <div class="card-header bg-primary text-white">
-                                <i class="fas fa-camera"></i> Capturar Seña
-                            </div>
-                            <div class="card-body">
-                                <!-- Selector de Letra -->
-                                <div class="mb-3">
-                                    <label for="letterSelect" class="form-label">Selecciona la Letra:</label>
-                                    <div class="d-grid gap-2" style="grid-template-columns: repeat(6, 1fr);">
-                                        <select id="letterSelect" class="form-select" style="grid-column: span 3;">
-                                            <option value="">Elige una letra...</option>
-                                            <option value="A">A</option>
-                                            <option value="B">B</option>
-                                            <option value="C">C</option>
-                                            <option value="D">D</option>
-                                            <option value="E">E</option>
-                                            <option value="F">F</option>
-                                            <option value="G">G</option>
-                                            <option value="H">H</option>
-                                            <option value="I">I</option>
-                                            <option value="K">K</option>
-                                            <option value="L">L</option>
-                                            <option value="M">M</option>
-                                            <option value="N">N</option>
-                                            <option value="O">O</option>
-                                            <option value="P">P</option>
-                                            <option value="Q">Q</option>
-                                            <option value="R">R</option>
-                                            <option value="S">S</option>
-                                            <option value="T">T</option>
-                                            <option value="U">U</option>
-                                            <option value="V">V</option>
-                                            <option value="W">W</option>
-                                            <option value="X">X</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <!-- Vista Previa -->
-                                <div class="mb-3">
-                                    <canvas id="datasetCanvas" width="320" height="240"
-                                            style="border: 2px solid #ddd; width: 100%; border-radius: 5px; display: none;"></canvas>
-                                    <video id="datasetVideo" width="320" height="240"
-                                           style="border: 2px solid #ddd; width: 100%; border-radius: 5px;"></video>
-                                </div>
-
-                                <!-- Botones -->
-                                <div class="d-grid gap-2">
-                                    <button id="startDatasetCameraBtn" class="btn btn-success btn-lg">
-                                        <i class="fas fa-video"></i> Iniciar Cámara
-                                    </button>
-                                    <button id="captureDatasetBtn" class="btn btn-primary btn-lg d-none">
-                                        <i class="fas fa-camera-circle"></i> Capturar Foto
-                                    </button>
-                                    <button id="stopDatasetCameraBtn" class="btn btn-danger btn-lg d-none">
-                                        <i class="fas fa-stop"></i> Detener Cámara
-                                    </button>
-                                </div>
-
-                                <div id="datasetStatus" class="alert alert-info mt-3 d-none"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-6">
-                        <div class="card mb-4">
-                            <div class="card-header bg-success text-white">
-                                <i class="fas fa-chart-pie"></i> Estadísticas del Dataset
-                            </div>
-                            <div class="card-body">
-                                <div class="row mb-3">
-                                    <div class="col-6">
-                                        <div class="text-center">
-                                            <div class="h2" id="totalDatasetImages">0</div>
-                                            <small class="text-muted">Total de Fotos</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="text-center">
-                                            <div class="h2" id="lettersCollected">0</div>
-                                            <small class="text-muted">Letras Recopiladas</small>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="card">
-                                    <div class="card-header bg-light">
-                                        <strong>Fotos por Letra:</strong>
-                                    </div>
-                                    <div class="card-body" style="max-height: 300px; overflow-y: auto;">
-                                        <div id="datasetLetterStats" class="small">
-                                            <p class="text-muted">Cargando estadísticas...</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <button id="refreshStatsBtn" class="btn btn-sm btn-outline-secondary mt-3 w-100">
-                                    <i class="fas fa-sync-alt"></i> Actualizar Estadísticas
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="card-header bg-warning text-dark">
-                                <i class="fas fa-lightbulb"></i> Consejos
-                            </div>
-                            <div class="card-body small">
-                                <ul>
-                                    <li>📸 Captura 10-20 fotos por letra para mejor accuracy</li>
-                                    <li>🤚 Mantén tu mano claramente visible</li>
-                                    <li>💡 Usa buena iluminación</li>
-                                    <li>🎯 Haz diferentes ángulos y posiciones</li>
-                                    <li>💾 Las fotos se guardan en <code>data/collected_data/</code></li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- SECCIÓN: Historial -->
-        <section id="history" class="page-section d-none">
-            <div class="container">
-                <h1 class="mb-4">
-                    <i class="fas fa-history"></i> Historial de Predicciones
-                </h1>
-
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="h3" id="historyTotal">0</div>
-                                <small class="text-muted">Total Predicciones</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="h3" id="historyUnique">0</div>
-                                <small class="text-muted">Letras Únicas</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="h3" id="historyAvg">0%</div>
-                                <small class="text-muted">Conf. Promedio</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <button id="clearHistoryBtn" class="btn btn-danger w-100">
-                            <i class="fas fa-trash"></i> Limpiar
-                        </button>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <i class="fas fa-table"></i> Tabla de Predicciones
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table id="historyTable" class="table table-striped table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Letra</th>
-                                        <th>Confianza</th>
-                                        <th>Contexto</th>
-                                        <th>Fecha/Hora</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="historyTableBody">
-                                    <tr>
-                                        <td colspan="4" class="text-center text-muted">Cargando...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-4">
-                    <button id="downloadCsvBtn" class="btn btn-info">
-                        <i class="fas fa-download"></i> Descargar CSV
+                <div class="card-body">
+                  <div class="input-group mb-2">
+                    <input
+                      type="text"
+                      id="currentWord"
+                      class="form-control"
+                      placeholder="Palabra..."
+                      readonly
+                      style="
+                        font-size: 1.2em;
+                        font-weight: bold;
+                        resize: none;
+                        width: 100%;
+                        height: 50px;
+                      "
+                    />
+                    <button
+                      id="clearWordBtn"
+                      class="btn btn-outline-danger"
+                      type="button"
+                      title="Borrar palabra actual"
+                    >
+                      <i class="fas fa-trash"></i> Borrar
                     </button>
+                  </div>
+                  <div class="alert alert-info mb-0">
+                    <small>
+                      <strong>Letra Detectada:</strong>
+                      <span id="detectedLetterDisplay">-</span> (<span
+                        id="detectedConfidenceDisplay"
+                        >0%</span
+                      >)
+                    </small>
+                  </div>
                 </div>
+              </div>
             </div>
-        </section>
 
-        <!-- SECCIÓN: Acerca de -->
-        <section id="about" class="page-section d-none">
-            <div class="container">
-                <h1 class="mb-4">
-                    <i class="fas fa-info-circle"></i> Acerca de
-                </h1>
+            <!-- Panel de Control y Predicción -->
+            <div class="col-lg-4">
+              <!-- Estado del Modelo -->
+              <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                  <i class="fas fa-cogs"></i> Estado
+                </div>
+                <div class="card-body">
+                  {% if model_exists %}
+                  <span class="badge bg-success"
+                    ><i class="fas fa-check"></i> Modelo Listo</span
+                  >
+                  {% else %}
+                  <span class="badge bg-danger"
+                    ><i class="fas fa-times"></i> Modelo No Disponible</span
+                  >
+                  {% endif %}
+                </div>
+              </div>
 
-                <div class="row">
-                    <div class="col-lg-8">
-                        <div class="card mb-4">
-                            <div class="card-header bg-primary text-white">
-                                <i class="fas fa-book"></i> Descripción del Proyecto
-                            </div>
-                            <div class="card-body">
-                                <p>
-                                    Este proyecto es un <strong>Traductor de Lenguaje de Señas</strong> basado en
-                                    inteligencia artificial. Utiliza aprendizaje profundo para reconocer y traducir
-                                    gestos de lenguaje de señas en tiempo real.
-                                </p>
-                                <p>
-                                    <strong>Características principales:</strong>
-                                </p>
-                                <ul>
-                                    <li>📷 Detección en vivo desde webcam</li>
-                                    <li>🧠 Modelo CNN de aprendizaje profundo (TensorFlow)</li>
-                                    <li>🤚 Reconocimiento de 24 letras del alfabeto de señas (A-X)</li>
-                                    <li>🎯 Detección de puntos de referencia con MediaPipe</li>
-                                    <li>💾 Almacenamiento de historial de predicciones</li>
-                                    <li>📊 Estadísticas y análisis de sesiones</li>
-                                </ul>
-                            </div>
-                        </div>
+              <!-- Predicción Actual -->
+              <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                  <i class="fas fa-lightbulb"></i> Predicción
+                </div>
+                <div class="card-body">
+                  <div class="text-center">
+                    <div class="display-4" id="currentLetter">-</div>
+                    <small class="text-muted">Letra Detectada</small>
+                  </div>
+                  <div class="mt-3">
+                    <div class="progress">
+                      <div
+                        id="confidenceBar"
+                        class="progress-bar bg-success"
+                        role="progressbar"
+                        style="width: 0%"
+                      ></div>
+                    </div>
+                    <small id="confidenceText" class="text-muted"
+                      >Confianza: 0%</small
+                    >
+                  </div>
+                </div>
+              </div>
 
-                        <div class="card mb-4">
-                            <div class="card-header bg-success text-white">
-                                <i class="fas fa-cogs"></i> Tecnologías Utilizadas
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <h6>Backend</h6>
-                                        <ul class="list-unstyled">
-                                            <li><i class="fab fa-python"></i> Python 3.9+</li>
-                                            <li><i class="fab fa-flask"></i> Flask</li>
-                                            <li><i class="fas fa-brain"></i> TensorFlow/Keras</li>
-                                            <li><i class="fas fa-hand-paper"></i> MediaPipe</li>
-                                        </ul>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <h6>Frontend</h6>
-                                        <ul class="list-unstyled">
-                                            <li><i class="fab fa-html5"></i> HTML5</li>
-                                            <li><i class="fab fa-css3"></i> CSS3/Bootstrap</li>
-                                            <li><i class="fab fa-js"></i> JavaScript</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+              <!-- Configuración -->
+              <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                  <i class="fas fa-sliders-h"></i> Configuración
+                </div>
+                <div class="card-body">
+                  <label for="thresholdSlider" class="form-label">
+                    Umbral de Confianza: <span id="thresholdValue">75</span>%
+                  </label>
+                  <input
+                    type="range"
+                    id="thresholdSlider"
+                    class="form-range"
+                    min="0"
+                    max="100"
+                    value="75"
+                  />
+                </div>
+              </div>
 
-                        <div class="card mb-4">
-                            <div class="card-header bg-info text-white">
-                                <i class="fas fa-graduation-cap"></i> Instrucciones de Uso
-                            </div>
-                            <div class="card-body">
-                                <h6>Para Detección en Tiempo Real:</h6>
-                                <ol>
-                                    <li>Ve a la pestaña "Inicio"</li>
-                                    <li>Haz click en "Iniciar Cámara" y permite el acceso</li>
-                                    <li>Haz gestos de seña frente a la cámara</li>
-                                    <li>Observa las predicciones en tiempo real</li>
-                                    <li>Las letras se acumularán en "Palabra Actual"</li>
-                                    <li>Guarda palabras completas en el historial</li>
-                                </ol>
+              <!-- Estadísticas -->
+              <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                  <i class="fas fa-chart-bar"></i> Estadísticas
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-6">
+                      <div class="text-center">
+                        <div class="h4" id="statsTotal">0</div>
+                        <small class="text-muted">Predicciones</small>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="text-center">
+                        <div class="h4" id="statsDuration">00:00</div>
+                        <small class="text-muted">Duración</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-                                <h6 class="mt-3">Para Análisis de Fotos:</h6>
-                                <ol>
-                                    <li>Ve a la pestaña "Subir Foto"</li>
-                                    <li>Selecciona o arrastra una imagen</li>
-                                    <li>Haz click en "Analizar Imagen"</li>
-                                    <li>Visualiza el resultado con puntos de referencia</li>
-                                </ol>
-                            </div>
-                        </div>
+      <!-- SECCIÓN: Subir Foto -->
+      <section id="upload" class="page-section d-none">
+        <div class="container">
+          <h1 class="mb-4"><i class="fas fa-image"></i> Subir Foto</h1>
 
-                        <div class="card mb-4">
-                            <div class="card-header bg-warning text-dark">
-                                <i class="fas fa-lightbulb"></i> Consejos para Mejores Resultados
-                            </div>
-                            <div class="card-body">
-                                <ul>
-                                    <li>✅ Utiliza una mano clara y visible</li>
-                                    <li>✅ Asegura una buena iluminación</li>
-                                    <li>✅ Mantén tu mano dentro del frame</li>
-                                    <li>✅ Deja un pequeño margen alrededor de la mano</li>
-                                    <li>❌ Evita fondos muy similares al color de la piel</li>
-                                    <li>❌ No uses ropa con patrón similar a las manos</li>
-                                </ul>
-                            </div>
-                        </div>
+          <div class="row">
+            <div class="col-lg-6">
+              <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                  <i class="fas fa-cloud-upload-alt"></i> Seleccionar Imagen
+                </div>
+                <div class="card-body">
+                  <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-image fa-3x mb-3"></i>
+                    <p class="mb-2">
+                      Arrastra tu imagen aquí o haz click para seleccionar
+                    </p>
+                    <small class="text-muted"
+                      >Formatos: PNG, JPG, JPEG, GIF, WebP (máx. 200MB)</small
+                    >
+                    <input
+                      type="file"
+                      id="fileInput"
+                      class="d-none"
+                      accept="image/*"
+                    />
+                  </div>
+                  <div
+                    id="uploadError"
+                    class="alert alert-danger d-none mt-3"
+                    role="alert"
+                  ></div>
+                </div>
+              </div>
+
+              <button
+                id="analyzeBtn"
+                class="btn btn-success btn-lg w-100 mb-4"
+                disabled
+              >
+                <i class="fas fa-magic"></i> Analizar Imagen
+              </button>
+            </div>
+
+            <div class="col-lg-6">
+              <!-- Preview de Imagen -->
+              <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                  <i class="fas fa-eye"></i> Vista Previa
+                </div>
+                <div class="card-body text-center">
+                  <img
+                    id="previewImage"
+                    style="max-width: 100%; max-height: 400px; display: none"
+                  />
+                  <div id="noPreview" class="text-muted">
+                    <i class="fas fa-image fa-3x opacity-50"></i>
+                    <p>Ninguna imagen seleccionada</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Resultados -->
+              <div id="resultsContainer" class="d-none">
+                <div class="card">
+                  <div class="card-header bg-success text-white">
+                    <i class="fas fa-check"></i> Resultado
+                  </div>
+                  <div class="card-body">
+                    <div class="text-center">
+                      <div class="display-3" id="resultLetter">-</div>
+                      <small class="text-muted">Letra Detectada</small>
+                    </div>
+                    <div class="mt-3">
+                      <div class="progress">
+                        <div
+                          id="resultConfidenceBar"
+                          class="progress-bar bg-success"
+                          role="progressbar"
+                          style="width: 0%"
+                        ></div>
+                      </div>
+                      <small id="resultConfidenceText">Confianza: 0%</small>
                     </div>
 
-                    <!-- Sidebar Info -->
-                    <div class="col-lg-4">
-                        <div class="card mb-4 bg-light">
-                            <div class="card-header bg-dark text-white">
-                                <i class="fas fa-database"></i> Información de Entrenamiento
-                            </div>
-                            <div class="card-body">
-                                <p>
-                                    <strong>Dataset:</strong> Sign Language MNIST<br>
-                                    <strong>Tamaño de entrada:</strong> 28×28 píxeles (escala de grises)<br>
-                                    <strong>Clases:</strong> 24 letras (A-X, sin J-Z)<br>
-                                    <strong>Arquitectura:</strong> CNN con capas convolucionales<br>
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="card-header bg-secondary text-white">
-                                <i class="fas fa-hands-helping"></i> Limitaciones
-                            </div>
-                            <div class="card-body small">
-                                <ul class="list-unstyled">
-                                    <li>🔹 Reconoce una mano a la vez</li>
-                                    <li>🔹 Requiere seña de frente a la cámara</li>
-                                    <li>🔹 Mejor rendimiento con iluminación consistente</li>
-                                    <li>🔹 Algunas letras similares pueden confundirse</li>
-                                </ul>
-                            </div>
-                        </div>
+                    <!-- Landmarks -->
+                    <div class="mt-4">
+                      <img id="resultLandmarks" style="max-width: 100%" />
                     </div>
+                  </div>
                 </div>
+              </div>
             </div>
-        </section>
+          </div>
+        </div>
+      </section>
 
+      <!-- SECCIÓN: Recopilar Datos -->
+      <section id="dataset" class="page-section d-none">
+        <div class="container">
+          <h1 class="mb-4">
+            <i class="fas fa-database"></i> Recopilar Datos (Dataset)
+          </h1>
+
+          <div class="alert alert-info" role="alert">
+            <i class="fas fa-lightbulb"></i>
+            <strong>Ayuda a mejorar el modelo:</strong>
+            Toma fotos de tus señas para cada letra y guárdalas. Más datos =
+            Mejor detección
+          </div>
+
+          <div class="row">
+            <div class="col-lg-6">
+              <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                  <i class="fas fa-camera"></i> Capturar Seña
+                </div>
+                <div class="card-body">
+                  <!-- Selector de Letra -->
+                  <div class="mb-3">
+                    <label for="letterSelect" class="form-label"
+                      >Selecciona la Letra:</label
+                    >
+                    <div
+                      class="d-grid gap-2"
+                      style="grid-template-columns: repeat(6, 1fr)"
+                    >
+                      <select
+                        id="letterSelect"
+                        class="form-select"
+                        style="grid-column: span 3"
+                      >
+                        <option value="">Elige una letra...</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                        <option value="E">E</option>
+                        <option value="F">F</option>
+                        <option value="G">G</option>
+                        <option value="H">H</option>
+                        <option value="I">I</option>
+                        <option value="K">K</option>
+                        <option value="L">L</option>
+                        <option value="M">M</option>
+                        <option value="N">N</option>
+                        <option value="O">O</option>
+                        <option value="P">P</option>
+                        <option value="Q">Q</option>
+                        <option value="R">R</option>
+                        <option value="S">S</option>
+                        <option value="T">T</option>
+                        <option value="U">U</option>
+                        <option value="V">V</option>
+                        <option value="W">W</option>
+                        <option value="X">X</option>
+                        <option value="BORRAR">BORRAR</option>
+                        <option value="ESPACIO">ESPACIO</option>
+                        <option value="ESCUCHAR">ESCUCHAR</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Vista Previa -->
+                  <div class="mb-3">
+                    <canvas
+                      id="datasetCanvas"
+                      width="320"
+                      height="240"
+                      style="
+                        border: 2px solid #ddd;
+                        width: 100%;
+                        border-radius: 5px;
+                        display: none;
+                      "
+                    ></canvas>
+                    <video
+                      id="datasetVideo"
+                      width="320"
+                      height="240"
+                      style="
+                        border: 2px solid #ddd;
+                        width: 100%;
+                        border-radius: 5px;
+                      "
+                    ></video>
+                  </div>
+
+                  <!-- Botones -->
+                  <div class="d-grid gap-2">
+                    <button
+                      id="startDatasetCameraBtn"
+                      class="btn btn-success btn-lg"
+                    >
+                      <i class="fas fa-video"></i> Iniciar Cámara
+                    </button>
+                    <button
+                      id="captureDatasetBtn"
+                      class="btn btn-primary btn-lg d-none"
+                    >
+                      <i class="fas fa-camera-circle"></i> Capturar Foto
+                    </button>
+                    <button
+                      id="stopDatasetCameraBtn"
+                      class="btn btn-danger btn-lg d-none"
+                    >
+                      <i class="fas fa-stop"></i> Detener Cámara
+                    </button>
+                  </div>
+
+                  <div
+                    id="datasetStatus"
+                    class="alert alert-info mt-3 d-none"
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-6">
+              <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                  <i class="fas fa-chart-pie"></i> Estadísticas del Dataset
+                </div>
+                <div class="card-body">
+                  <div class="row mb-3">
+                    <div class="col-6">
+                      <div class="text-center">
+                        <div class="h2" id="totalDatasetImages">0</div>
+                        <small class="text-muted">Total de Fotos</small>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="text-center">
+                        <div class="h2" id="lettersCollected">0</div>
+                        <small class="text-muted">Letras Recopiladas</small>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="card">
+                    <div class="card-header bg-light">
+                      <strong>Fotos por Letra:</strong>
+                    </div>
+                    <div
+                      class="card-body"
+                      style="max-height: 300px; overflow-y: auto"
+                    >
+                      <div id="datasetLetterStats" class="small">
+                        <p class="text-muted">Cargando estadísticas...</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    id="refreshStatsBtn"
+                    class="btn btn-sm btn-outline-secondary mt-3 w-100"
+                  >
+                    <i class="fas fa-sync-alt"></i> Actualizar Estadísticas
+                  </button>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header bg-warning text-dark">
+                  <i class="fas fa-lightbulb"></i> Consejos
+                </div>
+                <div class="card-body small">
+                  <ul>
+                    <li>
+                      📸 Captura 10-20 fotos por letra para mejor accuracy
+                    </li>
+                    <li>🤚 Mantén tu mano claramente visible</li>
+                    <li>💡 Usa buena iluminación</li>
+                    <li>🎯 Haz diferentes ángulos y posiciones</li>
+                    <li>
+                      💾 Las fotos se guardan en
+                      <code>data/collected_data/</code>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN: Historial -->
+      <section id="history" class="page-section d-none">
+        <div class="container">
+          <h1 class="mb-4">
+            <i class="fas fa-history"></i> Historial de Predicciones
+          </h1>
+
+          <div class="row mb-4">
+            <div class="col-md-3">
+              <div class="card">
+                <div class="card-body">
+                  <div class="h3" id="historyTotal">0</div>
+                  <small class="text-muted">Total Predicciones</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card">
+                <div class="card-body">
+                  <div class="h3" id="historyUnique">0</div>
+                  <small class="text-muted">Letras Únicas</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card">
+                <div class="card-body">
+                  <div class="h3" id="historyAvg">0%</div>
+                  <small class="text-muted">Conf. Promedio</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <button id="clearHistoryBtn" class="btn btn-danger w-100">
+                <i class="fas fa-trash"></i> Limpiar
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header bg-primary text-white">
+              <i class="fas fa-table"></i> Tabla de Predicciones
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table
+                  id="historyTable"
+                  class="table table-striped table-hover"
+                >
+                  <thead>
+                    <tr>
+                      <th>Letra</th>
+                      <th>Confianza</th>
+                      <th>Contexto</th>
+                      <th>Fecha/Hora</th>
+                    </tr>
+                  </thead>
+                  <tbody id="historyTableBody">
+                    <tr>
+                      <td colspan="4" class="text-center text-muted">
+                        Cargando...
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <button id="downloadCsvBtn" class="btn btn-info">
+              <i class="fas fa-download"></i> Descargar CSV
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN: Acerca de -->
+      <section id="about" class="page-section d-none">
+        <div class="container">
+          <h1 class="mb-4"><i class="fas fa-info-circle"></i> Acerca de</h1>
+
+          <div class="row">
+            <div class="col-lg-8">
+              <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                  <i class="fas fa-book"></i> Descripción del Proyecto
+                </div>
+                <div class="card-body">
+                  <p>
+                    Este proyecto es un
+                    <strong>Traductor de Lenguaje de Señas</strong> basado en
+                    inteligencia artificial. Utiliza aprendizaje profundo para
+                    reconocer y traducir gestos de lenguaje de señas en tiempo
+                    real.
+                  </p>
+                  <p>
+                    <strong>Características principales:</strong>
+                  </p>
+                  <ul>
+                    <li>📷 Detección en vivo desde webcam</li>
+                    <li>🧠 Modelo CNN de aprendizaje profundo (TensorFlow)</li>
+                    <li>
+                      🤚 Reconocimiento de 24 letras del alfabeto de señas (A-X)
+                    </li>
+                    <li>🎯 Detección de puntos de referencia con MediaPipe</li>
+                    <li>💾 Almacenamiento de historial de predicciones</li>
+                    <li>📊 Estadísticas y análisis de sesiones</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                  <i class="fas fa-cogs"></i> Tecnologías Utilizadas
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <h6>Backend</h6>
+                      <ul class="list-unstyled">
+                        <li><i class="fab fa-python"></i> Python 3.9+</li>
+                        <li><i class="fab fa-flask"></i> Flask</li>
+                        <li><i class="fas fa-brain"></i> TensorFlow/Keras</li>
+                        <li><i class="fas fa-hand-paper"></i> MediaPipe</li>
+                      </ul>
+                    </div>
+                    <div class="col-md-6">
+                      <h6>Frontend</h6>
+                      <ul class="list-unstyled">
+                        <li><i class="fab fa-html5"></i> HTML5</li>
+                        <li><i class="fab fa-css3"></i> CSS3/Bootstrap</li>
+                        <li><i class="fab fa-js"></i> JavaScript</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                  <i class="fas fa-graduation-cap"></i> Instrucciones de Uso
+                </div>
+                <div class="card-body">
+                  <h6>Para Detección en Tiempo Real:</h6>
+                  <ol>
+                    <li>Ve a la pestaña "Inicio"</li>
+                    <li>Haz click en "Iniciar Cámara" y permite el acceso</li>
+                    <li>Haz gestos de seña frente a la cámara</li>
+                    <li>Observa las predicciones en tiempo real</li>
+                    <li>Las letras se acumularán en "Palabra Actual"</li>
+                    <li>Guarda palabras completas en el historial</li>
+                  </ol>
+
+                  <h6 class="mt-3">Para Análisis de Fotos:</h6>
+                  <ol>
+                    <li>Ve a la pestaña "Subir Foto"</li>
+                    <li>Selecciona o arrastra una imagen</li>
+                    <li>Haz click en "Analizar Imagen"</li>
+                    <li>Visualiza el resultado con puntos de referencia</li>
+                  </ol>
+                </div>
+              </div>
+
+              <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                  <i class="fas fa-lightbulb"></i> Consejos para Mejores
+                  Resultados
+                </div>
+                <div class="card-body">
+                  <ul>
+                    <li>✅ Utiliza una mano clara y visible</li>
+                    <li>✅ Asegura una buena iluminación</li>
+                    <li>✅ Mantén tu mano dentro del frame</li>
+                    <li>✅ Deja un pequeño margen alrededor de la mano</li>
+                    <li>❌ Evita fondos muy similares al color de la piel</li>
+                    <li>❌ No uses ropa con patrón similar a las manos</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sidebar Info -->
+            <div class="col-lg-4">
+              <div class="card mb-4 bg-light">
+                <div class="card-header bg-dark text-white">
+                  <i class="fas fa-database"></i> Información de Entrenamiento
+                </div>
+                <div class="card-body">
+                  <p>
+                    <strong>Dataset:</strong> Sign Language MNIST<br />
+                    <strong>Tamaño de entrada:</strong> 28×28 píxeles (escala de
+                    grises)<br />
+                    <strong>Clases:</strong> 24 letras (A-X, sin J-Z)<br />
+                    <strong>Arquitectura:</strong> CNN con capas
+                    convolucionales<br />
+                  </p>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header bg-secondary text-white">
+                  <i class="fas fa-hands-helping"></i> Limitaciones
+                </div>
+                <div class="card-body small">
+                  <ul class="list-unstyled">
+                    <li>🔹 Reconoce una mano a la vez</li>
+                    <li>🔹 Requiere seña de frente a la cámara</li>
+                    <li>🔹 Mejor rendimiento con iluminación consistente</li>
+                    <li>🔹 Algunas letras similares pueden confundirse</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
 
     <!-- Footer -->
     <footer class="bg-dark text-light text-center py-4 mt-5">
-        <p class="mb-0">
-            <i class="fas fa-heart text-danger"></i> Traductor de Lenguaje de Señas
-            - Construcción con TensorFlow, MediaPipe y Flask
-        </p>
+      <p class="mb-0">
+        <i class="fas fa-heart text-danger"></i> Traductor de Lenguaje de Señas
+        - Construcción con TensorFlow, MediaPipe y Flask
+      </p>
     </footer>
 
     <!-- Bootstrap 5 JS -->
@@ -668,42 +836,41 @@
     <script src="{{ url_for('static', filename='js/dataset.js') }}"></script>
 
     <script>
-        // Cambiar página
-        function switchPage(pageId, event) {
-            if (event) {
-                event.preventDefault();
-            }
-
-            // Ocultar todas las secciones
-            document.querySelectorAll('.page-section').forEach(section => {
-                section.classList.add('d-none');
-            });
-
-            // Mostrar sección seleccionada
-            document.getElementById(pageId).classList.remove('d-none');
-
-            // Actualizar navbar
-            document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
-                link.classList.remove('active');
-            });
-            document.querySelector(`a[href="#${pageId}"]`).classList.add('active');
-
-            // Cargar datos si es necesario
-            if (pageId === 'history') {
-                loadHistory();
-            }
-            if (pageId === 'dataset') {
-                loadDatasetStats();
-            }
+      // Cambiar página
+      function switchPage(pageId, event) {
+        if (event) {
+          event.preventDefault();
         }
 
-        // Inicializar
-        document.addEventListener('DOMContentLoaded', function() {
-            initCamera();
-            initUpload();
-            initHistory();
+        // Ocultar todas las secciones
+        document.querySelectorAll(".page-section").forEach((section) => {
+          section.classList.add("d-none");
         });
 
+        // Mostrar sección seleccionada
+        document.getElementById(pageId).classList.remove("d-none");
+
+        // Actualizar navbar
+        document.querySelectorAll(".navbar-nav .nav-link").forEach((link) => {
+          link.classList.remove("active");
+        });
+        document.querySelector(`a[href="#${pageId}"]`).classList.add("active");
+
+        // Cargar datos si es necesario
+        if (pageId === "history") {
+          loadHistory();
+        }
+        if (pageId === "dataset") {
+          loadDatasetStats();
+        }
+      }
+
+      // Inicializar
+      document.addEventListener("DOMContentLoaded", function () {
+        initCamera();
+        initUpload();
+        initHistory();
+      });
     </script>
-</body>
+  </body>
 </html>

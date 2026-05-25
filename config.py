@@ -23,8 +23,8 @@ class Config:
     # Modelos
     # Landmarks-based model (new - preferred)
     # NOTA: Ruta sin caracteres especiales para evitar problemas de encoding en Windows
-    MODEL_PATH = Path('C:/models_prod/best_model_hybrid.h5')
-    LABELS_PATH = Path('C:/models_prod/labels_hybrid.json')
+    MODEL_PATH = Path(__file__).parent / 'trained_models' / 'best_model_hybrid.h5'
+    LABELS_PATH = Path(__file__).parent / 'trained_models' / 'labels_hybrid.json'
 
     # Dataset type: 'landmarks' or 'mnist'
     DATASET_TYPE = 'landmarks'

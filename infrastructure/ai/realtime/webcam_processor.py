@@ -139,7 +139,6 @@ class WebcamProcessor:
         h, w, c = frame.shape
 
         # Flip frame for selfie view
-        frame = cv2.flip(frame, 1)
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
         annotated_frame = frame.copy()

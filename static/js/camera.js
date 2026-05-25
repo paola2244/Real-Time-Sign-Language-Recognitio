@@ -19,6 +19,12 @@ let currentRunId = 0;
 let currentPredictionController = null;
 let frameRate = 5;
 
+// --- Variables para confirmación automática de letras ---
+let stableLetterCount = 0;
+let lastStableLetter = null;
+const FRAMES_TO_CONFIRM = 8; // frames seguidos para confirmar una letra (~1.6s a 5fps)
+const SPECIAL_SIGNS = ['BORRAR', 'ESPACIO', 'ESCUCHAR'];
+
 function initCamera() {
     if (isInitialized) {
         return;
@@ -77,7 +83,6 @@ async function startCamera() {
         console.log('Starting camera...');
         stream = await navigator.mediaDevices.getUserMedia({
             video: {
-                facingMode: 'user',
                 width: { ideal: 640 },
                 height: { ideal: 480 }
             },
@@ -97,6 +102,8 @@ async function startCamera() {
         startTime = Date.now();
         frameCount = 0;
         window.currentLetter = null;
+        stableLetterCount = 0;
+        lastStableLetter = null;
 
         setCameraButtons(true);
         updateStats();
@@ -119,6 +126,8 @@ function stopCamera() {
     isStarting = false;
     isRunning = false;
     isPredicting = false;
+    stableLetterCount = 0;
+    lastStableLetter = null;
 
     stopPredictionLoop();
     stopStatsTimer();
@@ -287,14 +296,93 @@ function updatePredictionUI(result) {
         if (detLetter) detLetter.textContent = result.letter;
         if (detConf) detConf.textContent = confidence + '%';
         window.currentLetter = result.letter;
+
+        // --- Lógica de confirmación automática por estabilidad ---
+        if (result.letter === lastStableLetter) {
+            stableLetterCount++;
+        } else {
+            stableLetterCount = 1;
+            lastStableLetter = result.letter;
+        }
+
+        if (stableLetterCount === FRAMES_TO_CONFIRM) {
+            stableLetterCount = 0; // reset para no disparar de nuevo
+            handleStableLetter(result.letter);
+        }
+
+        // Mostrar progreso visual de confirmación (opcional)
+        updateConfirmationProgress(stableLetterCount, FRAMES_TO_CONFIRM);
+
     } else {
         if (detLetter) detLetter.textContent = '-';
         if (detConf) detConf.textContent = '0%';
         window.currentLetter = null;
+        stableLetterCount = 0;
+        lastStableLetter = null;
+        updateConfirmationProgress(0, FRAMES_TO_CONFIRM);
     }
 
-    if (result.landmarks_image && (!showLandmarks || showLandmarks.checked)) {
-        drawLandmarks(result.landmarks_image);
+}
+
+/**
+ * Muestra barra de progreso mientras se sostiene la seña.
+ * Si no existe el elemento en el HTML, no hace nada.
+ */
+function updateConfirmationProgress(current, total) {
+    const progressBar = document.getElementById('confirmationProgress');
+    if (progressBar) {
+        const pct = Math.round((current / total) * 100);
+        progressBar.style.width = pct + '%';
+    }
+}
+
+/**
+ * Se ejecuta cuando una letra se detecta estable por FRAMES_TO_CONFIRM frames.
+ * Decide qué hacer según si es letra normal o seña especial.
+ */
+async function handleStableLetter(letter) {
+    console.log(`Seña estable confirmada: ${letter}`);
+
+    try {
+        if (letter === 'BORRAR') {
+            const result = await removeLetter();
+            if (result.success) {
+                document.getElementById('currentWord').value = result.current_word;
+                showNotification('↩ Letra borrada', 'warning');
+            }
+
+        } else if (letter === 'ESPACIO') {
+            const result = await addLetter(' ');
+            if (result.success) {
+                document.getElementById('currentWord').value = result.current_word;
+                showNotification('Espacio agregado', 'info');
+            }
+
+        } else if (letter === 'ESCUCHAR') {
+            const response = await fetch('/api/speak', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            });
+            const result = await response.json();
+            if (result.success) {
+                document.getElementById('currentWord').value = '';
+                showNotification(`🔊 Leyendo: "${result.spoken_text}"`, 'success');
+            } else {
+                showNotification('No hay texto para leer', 'warning');
+            }
+
+        } else {
+            // Letra normal → agregar automáticamente al texto
+            const result = await addLetter(letter);
+            if (result.success) {
+                document.getElementById('currentWord').value = result.current_word;
+                showNotification(`"${letter}" agregada`, 'success', 1000);
+            }
+        }
+    } catch (error) {
+        console.error('Error handling stable letter:', error);
+        showNotification('Error al procesar seña', 'error');
     }
 }
 

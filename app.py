@@ -6,6 +6,8 @@ from datetime import datetime
 from pathlib import Path
 from io import BytesIO
 from functools import lru_cache
+import pyttsx3
+import threading
 
 from flask import Flask, render_template, request, jsonify, session
 from flask_session import Session
@@ -138,7 +140,7 @@ def process_image_for_prediction(image_array, save_to_db=True):
 
 
             # Dibujar landmarks si existen
-            landmarks_image = image_to_base64(annotated_frame) if annotated_frame is not None else None
+            landmarks_image = None 
 
             return {
                 'success': True,
@@ -330,7 +332,7 @@ def api_remove_letter():
     """Remueve la última letra de la palabra actual"""
     try:
         agent = get_agent()
-        agent.remove_last_letter()
+        agent.undo_letter()
 
         current_word = session.get('current_word', '')
         if current_word:
@@ -484,9 +486,12 @@ def api_collect_data():
         if 'image' not in request.files:
             return jsonify({'error': 'No image provided'}), 400
 
+        VALID_LABELS = {'BORRAR', 'ESPACIO', 'ESCUCHAR'}
         letter = request.form.get('letter', '').upper()
-        if not letter or len(letter) != 1 or not letter.isalpha():
+        if not letter:
             return jsonify({'error': 'Invalid letter'}), 400
+        if not ((len(letter) == 1 and letter.isalpha()) or letter in VALID_LABELS):
+            return jsonify({'error': 'Invalid label'}), 400
 
         file = request.files['image']
         if file.filename == '':
@@ -546,6 +551,55 @@ def api_dataset_stats():
 
     except Exception as e:
         logger.error(f"Error in /api/dataset-stats: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+# Singleton del engine de voz (fuera de la función)
+_tts_engine = None
+
+def get_tts_engine():
+    global _tts_engine
+    if _tts_engine is None:
+        _tts_engine = pyttsx3.init()
+        _tts_engine.setProperty('rate', 150)
+        _tts_engine.setProperty('volume', 1.0)
+    return _tts_engine
+
+
+@app.route('/api/speak', methods=['POST'])
+def api_speak():
+    try:
+        data = request.get_json()
+        texto = data.get('text', '').strip() if data else ''
+
+        if not texto:
+            texto = session.get('current_word', '').strip()
+
+        if not texto:
+            return jsonify({'error': 'No text to speak'}), 400
+
+        def _hablar(t):
+            import pyttsx3
+            engine = pyttsx3.init()  # engine nuevo cada vez
+            engine.setProperty('rate', 150)
+            engine.setProperty('volume', 1.0)
+            engine.say(t)
+            engine.runAndWait()
+            engine.stop()  # libera recursos
+
+        hilo = threading.Thread(target=_hablar, args=(texto,), daemon=True)
+        hilo.start()
+
+        session['current_word'] = ''
+        session.modified = True
+
+        return jsonify({
+            'success': True,
+            'spoken_text': texto
+        })
+
+    except Exception as e:
+        logger.error(f"Error in /api/speak: {e}")
         return jsonify({'error': str(e)}), 500
 
 
