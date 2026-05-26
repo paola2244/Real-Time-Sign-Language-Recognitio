@@ -93,7 +93,7 @@ class CollectedDataProcessor:
             logger.error(f"Error extrayendo landmarks de {image_path}: {e}")
             return None
 
-    def load_collected_data(self, collected_data_dir: str = 'data/collected_data') -> tuple:
+    def load_collected_data(self, collected_data_dir: str = None) -> tuple:
         """
         Carga todas las imágenes recopiladas.
 
@@ -103,6 +103,9 @@ class CollectedDataProcessor:
         Returns:
             (X, y): Arrays de landmarks y etiquetas
         """
+        if collected_data_dir is None:
+            collected_data_dir = PROJECT_ROOT / 'data' / 'collected_data'
+
         collected_path = Path(collected_data_dir)
         if not collected_path.exists():
             logger.warning(f"No existe directorio: {collected_data_dir}")
@@ -118,7 +121,11 @@ class CollectedDataProcessor:
                 continue
 
             letter = letter_dir.name
-            image_files = list(letter_dir.glob('*.jpg'))
+            if letter.upper() == 'DEL':
+                letter = 'del'
+            elif letter.upper() == 'SPACE':
+                letter = 'space'
+            image_files = list(letter_dir.glob('*.jpg')) + list(letter_dir.glob('*.jpeg')) + list(letter_dir.glob('*.png'))
 
             print(f'[*] Procesando letra "{letter}": {len(image_files)} imágenes...')
 
@@ -161,6 +168,8 @@ class HybridDataTrainer:
         
         self.model_path = Path(model_path)
         self.output_dir = Path(output_dir)
+        if not self.output_dir.is_absolute():
+            self.output_dir = PROJECT_ROOT / self.output_dir
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
     def load_existing_model(self) -> tf.keras.Model:
@@ -176,7 +185,7 @@ class HybridDataTrainer:
     def prepare_training_data(self, X: np.ndarray, y: np.ndarray,
                             validation_split: float = 0.2) -> tuple:
         """
-        Prepara datos para entrenamiento usando las 28 clases originales.
+        Prepara datos para entrenamiento usando las clases soportadas.
 
         Args:
             X: Features (landmarks)
@@ -186,12 +195,22 @@ class HybridDataTrainer:
         Returns:
             (X_train, y_train, X_val, y_val, label_to_idx)
         """
-        # Usar las 28 clases originales
+        # Usar las clases soportadas por la aplicacion
         original_labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
                         'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
                         'del', 'space', 'BORRAR', 'ESPACIO', 'ESCUCHAR']
         label_to_idx = {label: idx for idx, label in enumerate(original_labels)}
         num_classes = len(original_labels)
+
+        valid_mask = np.array([label in label_to_idx for label in y], dtype=bool)
+        if not valid_mask.all():
+            skipped = sorted(set(y[~valid_mask]))
+            print(f'[!] Etiquetas ignoradas porque no estan soportadas: {skipped}')
+            X = X[valid_mask]
+            y = y[valid_mask]
+
+        if len(X) == 0:
+            raise ValueError("No hay imagenes con etiquetas validas para entrenar")
 
         y_numeric = np.array([label_to_idx.get(label, 0) for label in y], dtype=np.int32)
 
@@ -266,12 +285,18 @@ class HybridDataTrainer:
             verbose=1
         )
 
+        canonical_model_file = self.output_dir / 'best_model_hybrid.h5'
+        best_model = tf.keras.models.load_model(str(model_file))
+        best_model.save(str(canonical_model_file))
+
         print(f'[+] Modelo guardado: {model_file}')
-        return model, model_file, history
+        print(f'[+] Modelo activo actualizado: {canonical_model_file}')
+        return best_model, canonical_model_file, history
 
     def update_labels(self, label_to_idx: dict):
         """Actualiza el archivo de labels."""
         labels_file = self.output_dir / f'labels_hybrid_improved_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json'
+        canonical_labels_file = self.output_dir / 'labels_hybrid.json'
 
         # Invertir mapeo
         idx_to_label = {idx: label for label, idx in label_to_idx.items()}
@@ -280,8 +305,11 @@ class HybridDataTrainer:
             json.dump(idx_to_label, f, indent=2)
 
         print(f'[+] Labels guardados: {labels_file}')
+        with open(canonical_labels_file, 'w') as f:
+            json.dump(idx_to_label, f, indent=2)
+        print(f'[+] Labels activos actualizados: {canonical_labels_file}')
 
-        return labels_file
+        return canonical_labels_file
 
 
 def main():
@@ -322,10 +350,8 @@ def main():
     print(f"  - Modelo: {model_file}")
     print(f"  - Labels: {labels_file}")
     print(f"\nPróximos pasos:")
-    print(f"  1. Copiar el modelo a: C:/models_prod/best_model_hybrid.h5")
-    print(f"  2. Copiar labels a: C:/models_prod/labels_hybrid.json")
-    print(f"  3. Reiniciar la aplicación Flask")
-    print(f"  4. Probar la detección mejorada")
+    print(f"  1. Reiniciar la aplicacion Flask")
+    print(f"  2. Probar la deteccion mejorada")
     print("=" * 60)
 
 

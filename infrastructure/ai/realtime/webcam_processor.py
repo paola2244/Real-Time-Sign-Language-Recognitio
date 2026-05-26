@@ -296,7 +296,8 @@ class WebcamProcessor:
 
     def close(self):
         """Release resources."""
-        self.hands.close()
+        if self.hands is not None and hasattr(self.hands, "close"):
+            self.hands.close()
         logger.info("WebcamProcessor closed")
 
     def __enter__(self):
