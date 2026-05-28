@@ -192,6 +192,33 @@ video {
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
+/* Asegura contraste en encabezados y bloques con fondo oscuro. */
+.bg-dark,
+.bg-primary,
+.bg-success,
+.bg-danger,
+.bg-info,
+.navbar-dark,
+.footer-dark,
+footer.bg-dark {
+    color: #ffffff !important;
+}
+
+.bg-dark *,
+.bg-primary *,
+.bg-success *,
+.bg-danger *,
+.bg-info *,
+.navbar-dark *,
+footer.bg-dark * {
+    color: #ffffff !important;
+}
+
+.bg-warning,
+.bg-warning * {
+    color: #212529 !important;
+}
+
 /* ==================== PROGRESS BARS ====================*/
 
 .progress {

@@ -13,6 +13,7 @@ class Prediction:
         confidence: float,
         word_context: str,
         session_id: str,
+        timestamp: Optional[str] = None,
         _id: Optional[str] = None
     ):
         """Initialize prediction."""
@@ -20,7 +21,7 @@ class Prediction:
         self.letter = letter
         self.confidence = confidence
         self.word_context = word_context
-        self.timestamp = datetime.now().isoformat()
+        self.timestamp = timestamp or datetime.now().isoformat()
         self.session_id = session_id
 
     def to_dict(self) -> dict:
@@ -44,5 +45,6 @@ class Prediction:
             confidence=data['confidence'],
             word_context=data.get('word_context', ''),
             session_id=data['session_id'],
+            timestamp=data.get('timestamp'),
             _id=data.get('_id')
         )

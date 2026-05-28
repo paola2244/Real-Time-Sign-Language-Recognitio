@@ -22,8 +22,16 @@ let frameRate = 5;
 // --- Variables para confirmación automática de letras ---
 let stableLetterCount = 0;
 let lastStableLetter = null;
-const FRAMES_TO_CONFIRM = 8; // frames seguidos para confirmar una letra (~1.6s a 5fps)
+const FRAMES_TO_CONFIRM = 9; // frames seguidos para confirmar una letra (~1.8s a 5fps)
 const SPECIAL_SIGNS = ['BORRAR', 'ESPACIO', 'ESCUCHAR'];
+
+function getConfidenceThreshold() {
+    const thresholdSlider = document.getElementById('thresholdSlider');
+    if (!thresholdSlider) {
+        return 0.75;
+    }
+    return Math.max(0, Math.min(1, Number(thresholdSlider.value) / 100));
+}
 
 function initCamera() {
     if (isInitialized) {
@@ -58,6 +66,8 @@ function initCamera() {
         thresholdSlider.addEventListener('input', () => {
             const value = document.getElementById('thresholdValue');
             if (value) value.textContent = thresholdSlider.value;
+            stableLetterCount = 0;
+            lastStableLetter = null;
         });
     }
 
@@ -217,6 +227,7 @@ async function predictCurrentFrame(runId) {
     try {
         canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
         const result = await apiPredictFrame(canvasElement, {
+            threshold: getConfidenceThreshold(),
             signal: currentPredictionController.signal
         });
 
@@ -296,6 +307,7 @@ function updatePredictionUI(result) {
         if (detLetter) detLetter.textContent = result.letter;
         if (detConf) detConf.textContent = confidence + '%';
         window.currentLetter = result.letter;
+        window.currentConfidence = result.confidence || 0;
 
         // --- Lógica de confirmación automática por estabilidad ---
         if (result.letter === lastStableLetter) {
@@ -307,7 +319,7 @@ function updatePredictionUI(result) {
 
         if (stableLetterCount === FRAMES_TO_CONFIRM) {
             stableLetterCount = 0; // reset para no disparar de nuevo
-            handleStableLetter(result.letter);
+            handleStableLetter(result.letter, result.confidence || 0);
         }
 
         // Mostrar progreso visual de confirmación (opcional)
@@ -317,6 +329,7 @@ function updatePredictionUI(result) {
         if (detLetter) detLetter.textContent = '-';
         if (detConf) detConf.textContent = '0%';
         window.currentLetter = null;
+        window.currentConfidence = 0;
         stableLetterCount = 0;
         lastStableLetter = null;
         updateConfirmationProgress(0, FRAMES_TO_CONFIRM);
@@ -336,11 +349,25 @@ function updateConfirmationProgress(current, total) {
     }
 }
 
+function speakInBrowser(text) {
+    if (!text || !('speechSynthesis' in window)) {
+        return false;
+    }
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'es-CO';
+    utterance.rate = 0.95;
+    utterance.volume = 1;
+    window.speechSynthesis.speak(utterance);
+    return true;
+}
+
 /**
  * Se ejecuta cuando una letra se detecta estable por FRAMES_TO_CONFIRM frames.
  * Decide qué hacer según si es letra normal o seña especial.
  */
-async function handleStableLetter(letter) {
+async function handleStableLetter(letter, confidence = 0) {
     console.log(`Seña estable confirmada: ${letter}`);
 
     try {
@@ -352,7 +379,7 @@ async function handleStableLetter(letter) {
             }
 
         } else if (letter === 'ESPACIO') {
-            const result = await addLetter(' ');
+            const result = await addLetter(' ', confidence);
             if (result.success) {
                 document.getElementById('currentWord').value = result.current_word;
                 showNotification('Espacio agregado', 'info');
@@ -367,14 +394,18 @@ async function handleStableLetter(letter) {
             const result = await response.json();
             if (result.success) {
                 document.getElementById('currentWord').value = '';
+                const spoke = speakInBrowser(result.spoken_text);
                 showNotification(`🔊 Leyendo: "${result.spoken_text}"`, 'success');
+                if (!spoke) {
+                    showNotification('Tu navegador no permite reproducir voz automaticamente', 'warning');
+                }
             } else {
                 showNotification('No hay texto para leer', 'warning');
             }
 
         } else {
             // Letra normal → agregar automáticamente al texto
-            const result = await addLetter(letter);
+            const result = await addLetter(letter, confidence);
             if (result.success) {
                 document.getElementById('currentWord').value = result.current_word;
                 showNotification(`"${letter}" agregada`, 'success', 1000);
@@ -424,7 +455,7 @@ async function acceptLetter() {
     }
 
     try {
-        const result = await addLetter(window.currentLetter);
+        const result = await addLetter(window.currentLetter, window.currentConfidence || 0);
         if (result.success) {
             document.getElementById('currentWord').value = result.current_word;
             showNotification(`Letra "${window.currentLetter}" agregada`, 'success');
@@ -451,8 +482,13 @@ async function clearWord() {
     if (!confirm('Borrar palabra actual?')) return;
 
     try {
-        await resetWord();
-        document.getElementById('currentWord').value = '';
+        const result = await resetWord();
+        if (result.success) {
+            document.getElementById('currentWord').value = result.current_word || '';
+            stableLetterCount = 0;
+            lastStableLetter = null;
+            showNotification('Palabra borrada', 'success');
+        }
     } catch (error) {
         console.error('Error clearing word:', error);
         showNotification('Error al borrar la palabra', 'error');

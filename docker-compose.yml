@@ -1,0 +1,20 @@
+services:
+  sign-language-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sign-language-app
+    env_file:
+      - .env
+    environment:
+      FLASK_ENV: production
+      PYTHONUNBUFFERED: "1"
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./data/json_db:/app/data/json_db
+      - ./data/collected_data:/app/data/collected_data
+      - ./uploads:/app/uploads
+      - ./flask_session:/app/flask_session
+      - ./logs:/app/logs
+    restart: unless-stopped

@@ -167,9 +167,14 @@ function initHistory() {
 
     const clearHistoryBtn = document.getElementById('clearHistoryBtn');
     const downloadCsvBtn = document.getElementById('downloadCsvBtn');
+    const saveHistoryDbBtn = document.getElementById('saveHistoryDbBtn');
 
     if (clearHistoryBtn) {
         clearHistoryBtn.addEventListener('click', handleClearHistory);
+    }
+
+    if (saveHistoryDbBtn) {
+        saveHistoryDbBtn.addEventListener('click', handleSaveHistoryToDatabase);
     }
 
     if (downloadCsvBtn) {
@@ -256,6 +261,35 @@ async function handleClearHistory() {
     } catch (error) {
         console.error('Error clearing history:', error);
         showNotification('Error al limpiar historial', 'error');
+    }
+}
+
+async function handleSaveHistoryToDatabase() {
+    const saveHistoryDbBtn = document.getElementById('saveHistoryDbBtn');
+    const originalHtml = saveHistoryDbBtn ? saveHistoryDbBtn.innerHTML : '';
+
+    if (saveHistoryDbBtn) {
+        saveHistoryDbBtn.disabled = true;
+        saveHistoryDbBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+    }
+
+    try {
+        const result = await saveHistoryToDatabase();
+
+        if (result.success) {
+            showNotification(result.message || 'Historial guardado en base de datos', 'success');
+            loadHistory();
+        } else {
+            showNotification(result.error || 'No se pudo guardar el historial', 'warning');
+        }
+    } catch (error) {
+        console.error('Error saving history to database:', error);
+        showNotification('Error al guardar historial en base de datos', 'error');
+    } finally {
+        if (saveHistoryDbBtn) {
+            saveHistoryDbBtn.disabled = false;
+            saveHistoryDbBtn.innerHTML = originalHtml;
+        }
     }
 }
 

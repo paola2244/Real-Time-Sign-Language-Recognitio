@@ -68,6 +68,9 @@ async function apiPredictFrame(canvas, options = {}) {
 
         const formData = new FormData();
         formData.append('image', blob, 'frame.jpg');
+        if (typeof options.threshold === 'number') {
+            formData.append('confidence_threshold', String(options.threshold));
+        }
 
         const response = await fetch('/api/predict', {
             method: 'POST',
@@ -97,9 +100,17 @@ async function clearHistory() {
     return apiCall('/api/history/clear', 'POST');
 }
 
+// Funcion para guardar el historial de sesion en base de datos
+async function saveHistoryToDatabase() {
+    return apiCall('/api/history/save-to-db', 'POST');
+}
+
 // Función para agregar letra
-async function addLetter(letter) {
-    return apiCall('/api/add-letter', 'POST', { letter: letter });
+async function addLetter(letter, confidence = null) {
+    return apiCall('/api/add-letter', 'POST', {
+        letter: letter,
+        confidence: confidence
+    });
 }
 
 // Función para remover letra
@@ -153,7 +164,10 @@ document.addEventListener('DOMContentLoaded', function() {
         setInterval(async () => {
             try {
                 const state = await getSessionState();
-                currentWordInput.value = state.current_word;
+                const serverWord = state.current_word || '';
+                if (serverWord || !currentWordInput.value) {
+                    currentWordInput.value = serverWord;
+                }
             } catch (error) {
                 console.error('Error updating word:', error);
             }

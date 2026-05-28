@@ -1,1 +1,490 @@
-[]
+[
+  {
+    "letter": "E",
+    "confidence": 0.8091800808906555,
+    "word_context": "",
+    "timestamp": "2026-05-27T15:52:28.935725",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "1"
+  },
+  {
+    "letter": "A",
+    "confidence": 0.9709450602531433,
+    "word_context": "",
+    "timestamp": "2026-05-27T15:52:31.671169",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "2"
+  },
+  {
+    "letter": "A",
+    "confidence": 0.9964396357536316,
+    "word_context": "",
+    "timestamp": "2026-05-27T15:52:33.979744",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "3"
+  },
+  {
+    "letter": "A",
+    "confidence": 0.9911670088768005,
+    "word_context": "",
+    "timestamp": "2026-05-27T15:52:35.599490",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "4"
+  },
+  {
+    "letter": "A",
+    "confidence": 0.9794347882270813,
+    "word_context": "",
+    "timestamp": "2026-05-27T15:52:36.550005",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "5"
+  },
+  {
+    "letter": "A",
+    "confidence": 0.9757733345031738,
+    "word_context": "",
+    "timestamp": "2026-05-27T15:52:37.266225",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "6"
+  },
+  {
+    "letter": "A",
+    "confidence": 0.9712139368057251,
+    "word_context": "",
+    "timestamp": "2026-05-27T15:52:37.816644",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "7"
+  },
+  {
+    "letter": "A",
+    "confidence": 0.9746818542480469,
+    "word_context": "",
+    "timestamp": "2026-05-27T15:52:38.221567",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "8"
+  },
+  {
+    "letter": "A",
+    "confidence": 0.9558408260345459,
+    "word_context": "",
+    "timestamp": "2026-05-27T15:52:38.593166",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "9"
+  },
+  {
+    "letter": "A",
+    "confidence": 0.9708158373832703,
+    "word_context": "",
+    "timestamp": "2026-05-27T15:52:39.590065",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "10"
+  },
+  {
+    "letter": "V",
+    "confidence": 0.7523764967918396,
+    "word_context": "",
+    "timestamp": "2026-05-27T15:52:42.806390",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "11"
+  },
+  {
+    "letter": "V",
+    "confidence": 0.9443520903587341,
+    "word_context": "",
+    "timestamp": "2026-05-27T15:52:44.415783",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "12"
+  },
+  {
+    "letter": "V",
+    "confidence": 0.7593702077865601,
+    "word_context": "",
+    "timestamp": "2026-05-27T15:52:45.025832",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "13"
+  },
+  {
+    "letter": "V",
+    "confidence": 0.8302528262138367,
+    "word_context": "",
+    "timestamp": "2026-05-27T15:52:45.484943",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "14"
+  },
+  {
+    "letter": "A",
+    "confidence": 0.9800089597702026,
+    "word_context": "",
+    "timestamp": "2026-05-27T15:52:45.801784",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "15"
+  },
+  {
+    "letter": "A",
+    "confidence": 0.9856981635093689,
+    "word_context": "",
+    "timestamp": "2026-05-27T15:52:46.462820",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "16"
+  },
+  {
+    "letter": "A",
+    "confidence": 0.9918711185455322,
+    "word_context": "",
+    "timestamp": "2026-05-27T15:52:47.015578",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "17"
+  },
+  {
+    "letter": "O",
+    "confidence": 0.9378911256790161,
+    "word_context": "",
+    "timestamp": "2026-05-27T15:52:49.000974",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "18"
+  },
+  {
+    "letter": "F",
+    "confidence": 0.9649448394775391,
+    "word_context": "",
+    "timestamp": "2026-05-27T23:05:49.336535",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "19"
+  },
+  {
+    "letter": "A",
+    "confidence": 0.9043114185333252,
+    "word_context": "",
+    "timestamp": "2026-05-27T23:08:54.929193",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "20"
+  },
+  {
+    "letter": "A",
+    "confidence": 0.7746802568435669,
+    "word_context": "",
+    "timestamp": "2026-05-27T23:11:50.575277",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "21"
+  },
+  {
+    "letter": "A",
+    "confidence": 0.7643598914146423,
+    "word_context": "",
+    "timestamp": "2026-05-27T23:11:50.778796",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "22"
+  },
+  {
+    "letter": "M",
+    "confidence": 0.7744884490966797,
+    "word_context": "",
+    "timestamp": "2026-05-27T23:12:05.993464",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "23"
+  },
+  {
+    "letter": "M",
+    "confidence": 0.7834538221359253,
+    "word_context": "",
+    "timestamp": "2026-05-27T23:12:07.824461",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "24"
+  },
+  {
+    "letter": "M",
+    "confidence": 0.9052879214286804,
+    "word_context": "",
+    "timestamp": "2026-05-27T23:12:08.009257",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "25"
+  },
+  {
+    "letter": "M",
+    "confidence": 0.9874978065490723,
+    "word_context": "",
+    "timestamp": "2026-05-27T23:12:08.210312",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "26"
+  },
+  {
+    "letter": "M",
+    "confidence": 0.9621996879577637,
+    "word_context": "",
+    "timestamp": "2026-05-27T23:12:08.374479",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "27"
+  },
+  {
+    "letter": "M",
+    "confidence": 0.9820871949195862,
+    "word_context": "",
+    "timestamp": "2026-05-27T23:12:08.575544",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "28"
+  },
+  {
+    "letter": "M",
+    "confidence": 0.958712637424469,
+    "word_context": "",
+    "timestamp": "2026-05-27T23:12:08.784767",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "29"
+  },
+  {
+    "letter": "M",
+    "confidence": 0.9707008004188538,
+    "word_context": "",
+    "timestamp": "2026-05-27T23:12:08.992743",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "30"
+  },
+  {
+    "letter": "M",
+    "confidence": 0.9820225834846497,
+    "word_context": "",
+    "timestamp": "2026-05-27T23:12:09.816932",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "31"
+  },
+  {
+    "letter": "M",
+    "confidence": 0.9776286482810974,
+    "word_context": "",
+    "timestamp": "2026-05-27T23:12:09.977715",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "32"
+  },
+  {
+    "letter": "M",
+    "confidence": 0.9704099893569946,
+    "word_context": "",
+    "timestamp": "2026-05-27T23:12:10.194610",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "33"
+  },
+  {
+    "letter": "M",
+    "confidence": 0.9581113457679749,
+    "word_context": "",
+    "timestamp": "2026-05-27T23:12:10.394029",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "34"
+  },
+  {
+    "letter": "M",
+    "confidence": 0.9455319046974182,
+    "word_context": "",
+    "timestamp": "2026-05-27T23:12:10.594479",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "35"
+  },
+  {
+    "letter": "M",
+    "confidence": 0.9680256247520447,
+    "word_context": "",
+    "timestamp": "2026-05-27T23:12:10.802043",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "36"
+  },
+  {
+    "letter": "M",
+    "confidence": 0.9683805108070374,
+    "word_context": "",
+    "timestamp": "2026-05-27T23:12:10.974510",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "37"
+  },
+  {
+    "letter": "M",
+    "confidence": 0.9554868340492249,
+    "word_context": "",
+    "timestamp": "2026-05-27T23:12:11.180721",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "38"
+  },
+  {
+    "letter": "M",
+    "confidence": 0.9629705548286438,
+    "word_context": "",
+    "timestamp": "2026-05-27T23:12:11.374380",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "39"
+  },
+  {
+    "letter": "M",
+    "confidence": 0.9638156294822693,
+    "word_context": "",
+    "timestamp": "2026-05-27T23:12:11.574398",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "40"
+  },
+  {
+    "letter": "M",
+    "confidence": 0.9608365893363953,
+    "word_context": "",
+    "timestamp": "2026-05-27T23:12:11.784204",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "41"
+  },
+  {
+    "letter": "M",
+    "confidence": 0.9574642777442932,
+    "word_context": "",
+    "timestamp": "2026-05-27T23:12:11.980067",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "42"
+  },
+  {
+    "letter": "M",
+    "confidence": 0.9375720620155334,
+    "word_context": "",
+    "timestamp": "2026-05-27T23:12:12.230696",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "43"
+  },
+  {
+    "letter": "M",
+    "confidence": 0.9935613870620728,
+    "word_context": "",
+    "timestamp": "2026-05-27T23:12:12.375313",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "44"
+  },
+  {
+    "letter": "T",
+    "confidence": 0.7554089426994324,
+    "word_context": "M",
+    "timestamp": "2026-05-27T23:51:10.643704",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "45"
+  },
+  {
+    "letter": "T",
+    "confidence": 0.776585042476654,
+    "word_context": "M",
+    "timestamp": "2026-05-27T23:51:10.855163",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "46"
+  },
+  {
+    "letter": "T",
+    "confidence": 0.7764991521835327,
+    "word_context": "M",
+    "timestamp": "2026-05-27T23:51:11.244431",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "47"
+  },
+  {
+    "letter": "T",
+    "confidence": 0.7682486176490784,
+    "word_context": "M",
+    "timestamp": "2026-05-27T23:51:11.654036",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "48"
+  },
+  {
+    "letter": "T",
+    "confidence": 0.964806318283081,
+    "word_context": "M",
+    "timestamp": "2026-05-27T23:51:11.845699",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "49"
+  },
+  {
+    "letter": "Z",
+    "confidence": 0.8507210612297058,
+    "word_context": "M",
+    "timestamp": "2026-05-27T23:51:12.041841",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "50"
+  },
+  {
+    "letter": "T",
+    "confidence": 0.9926514029502869,
+    "word_context": "M",
+    "timestamp": "2026-05-27T23:51:13.076698",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "51"
+  },
+  {
+    "letter": "T",
+    "confidence": 0.7914649248123169,
+    "word_context": "M",
+    "timestamp": "2026-05-27T23:57:01.280306",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "52"
+  },
+  {
+    "letter": "T",
+    "confidence": 0.7524889707565308,
+    "word_context": "M",
+    "timestamp": "2026-05-27T23:57:01.470678",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "53"
+  },
+  {
+    "letter": "T",
+    "confidence": 0.9098166823387146,
+    "word_context": "M",
+    "timestamp": "2026-05-27T23:57:02.089331",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "54"
+  },
+  {
+    "letter": "A",
+    "confidence": 0.7521423101425171,
+    "word_context": "M",
+    "timestamp": "2026-05-27T23:57:03.080801",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "55"
+  },
+  {
+    "letter": "L",
+    "confidence": 0.9936331510543823,
+    "word_context": "M",
+    "timestamp": "2026-05-27T23:57:03.488715",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "56"
+  },
+  {
+    "letter": "L",
+    "confidence": 0.9619089365005493,
+    "word_context": "M",
+    "timestamp": "2026-05-27T23:57:03.704651",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "57"
+  },
+  {
+    "letter": "M",
+    "confidence": 0.9654702544212341,
+    "word_context": "M",
+    "timestamp": "2026-05-27T23:57:03.882658",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "58"
+  },
+  {
+    "letter": "M",
+    "confidence": 0.8751097917556763,
+    "word_context": "M",
+    "timestamp": "2026-05-27T23:57:04.286263",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "59"
+  },
+  {
+    "letter": "M",
+    "confidence": 0.9674418568611145,
+    "word_context": "M",
+    "timestamp": "2026-05-27T23:57:04.703821",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "60"
+  },
+  {
+    "letter": "M",
+    "confidence": 0.9641073346138,
+    "word_context": "M",
+    "timestamp": "2026-05-27T23:57:04.880293",
+    "session_id": "3a598caf-9206-4f32-a659-0111a1629805",
+    "_id": "61"
+  }
+]

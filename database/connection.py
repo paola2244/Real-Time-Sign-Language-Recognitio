@@ -10,6 +10,49 @@ import json
 from pathlib import Path
 from typing import Optional, Dict, List
 from datetime import datetime
+from urllib.parse import urlparse
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+ENV_PATH = PROJECT_ROOT / '.env'
+
+
+def _read_project_env() -> Dict[str, str]:
+    """Read the project .env file even when Flask starts from another folder."""
+    values = {}
+    if not ENV_PATH.exists():
+        return values
+
+    for raw_line in ENV_PATH.read_text(encoding='utf-8-sig').splitlines():
+        line = raw_line.strip().lstrip('\ufeff')
+        if not line or line.startswith('#') or '=' not in line:
+            continue
+
+        key, value = line.split('=', 1)
+        key = key.strip().lstrip('\ufeff')
+        value = value.strip().strip('"').strip("'")
+
+        if key:
+            values[key] = value
+
+    return values
+
+
+def _load_project_env() -> Dict[str, str]:
+    """Load project .env values into this process and return them."""
+    values = _read_project_env()
+    for key, value in values.items():
+        os.environ[key] = value
+    return values
+
+
+_load_project_env()
+try:
+    from dotenv import load_dotenv
+    load_dotenv(ENV_PATH, override=True)
+    for key, value in _read_project_env().items():
+        os.environ[key] = value
+except ImportError:
+    pass
 
 try:
     from pymongo import MongoClient
@@ -37,12 +80,23 @@ class Database:
 
     def __init__(self):
         """Initialize database connection."""
-        if self._initialized:
+        env_values = _load_project_env()
+        mongodb_uri = env_values.get('MONGO_URI') or os.getenv('MONGO_URI', 'mongodb://localhost:27017')
+        db_name = env_values.get('MONGO_DB_NAME') or os.getenv('MONGO_DB_NAME', 'sign_language_db')
+
+        if self._initialized and self.mongodb_uri == mongodb_uri and self.db_name == db_name:
             return
 
-        self.mongodb_uri = os.getenv('MONGO_URI', 'mongodb://localhost:27017')
-        self.db_name = os.getenv('MONGO_DB_NAME', 'sign_language_db')
+        if self._initialized and self.client is not None:
+            self.client.close()
+
+        self.mongodb_uri = mongodb_uri
+        self.db_name = db_name
         self.use_mongodb = False
+        self.connection_status = "json"
+        self.connection_message = "Using JSON storage."
+        self.env_path = str(ENV_PATH)
+        self.configured_host = self._get_configured_host()
         self.client = None
         self.db = None
 
@@ -66,18 +120,30 @@ class Database:
             bool: True if connection successful
         """
         try:
-            self.client = MongoClient(self.mongodb_uri, serverSelectionTimeoutMS=2000)
+            self.client = MongoClient(self.mongodb_uri, serverSelectionTimeoutMS=10000)
             self.client.admin.command('ping')
             self.db = self.client[self.db_name]
             self.use_mongodb = True
+            self.connection_status = "mongodb"
+            self.connection_message = f"Connected to MongoDB: {self.db_name}"
             print(f"[OK] Connected to MongoDB: {self.db_name}")
             return True
-        except (ConnectionFailure, ServerSelectionTimeoutError):
-            print("[WARN] MongoDB connection failed. Using JSON storage.")
+        except (ConnectionFailure, ServerSelectionTimeoutError) as e:
+            self.connection_message = f"MongoDB connection failed: {e}. Using JSON storage."
+            print(f"[WARN] MongoDB connection failed: {e}. Using JSON storage.")
             return False
         except Exception as e:
+            self.connection_message = f"MongoDB error: {e}. Using JSON storage."
             print(f"[WARN] MongoDB error: {e}. Using JSON storage.")
             return False
+
+    def _get_configured_host(self) -> str:
+        """Return only the configured Mongo host, never credentials."""
+        try:
+            parsed = urlparse(self.mongodb_uri)
+            return parsed.hostname or 'localhost'
+        except Exception:
+            return 'unknown'
 
     def get_collection(self, collection_name: str):
         """
@@ -286,7 +352,7 @@ class JSONCollection:
         data = self._load_data()
         doc_id = str(len(data) + 1)
         document['_id'] = doc_id
-        document['timestamp'] = datetime.now().isoformat()
+        document.setdefault('timestamp', datetime.now().isoformat())
         data.append(document)
         self._save_data(data)
         return doc_id
